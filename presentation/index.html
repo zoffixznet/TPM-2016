@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Overview of the Mojolicious Toolkit</title>
+
+		<meta name="description" content="Overview of the Mojolicious Toolkit">
+		<meta name="author" content="Zoffix Znet">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/solarized.css" id="theme">
+        <link rel="stylesheet" href="css/theme/custom.css">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+		<script>
+			if( window.location.search.match( /print-pdf/gi ) ) {
+				var link = document.createElement( 'link' );
+				link.rel = 'stylesheet';
+				link.type = 'text/css';
+				link.href = 'css/print/pdf.css';
+				document.getElementsByTagName( 'head' )[0].appendChild( link );
+			}
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+                    <p>
+                        <img src="cover.png" style="border: 0; box-shadow: none" height=200>
+                    </p>
+					<h2>Overview of the Mojolicious Toolkit</h2>
+
+                    <p>
+						by Pete <i style="opacity: .5">'Zoffix Znet'</i> Evstratov
+					</p>
+
+                    <div class="intro-ref">
+                    <p>
+                        <a href="https://metacpan.org/author/ZOFFIX">https://metacpan.org/author/ZOFFIX</a>
+
+                    </p>
+                    </div>
+
+                    <p style="padding-top: 20px">This presentation is available at <a href="http://zoffix.com/TMP2015">TPM2015.zoffix.com</a></p>
+				</section>
+
+                <section>
+                    <h2>Question Policy</h2>
+
+                    <p>
+                        If you did not understand what I said or what I'm talking about, simply raise your hand.
+                    </p>
+
+                    <p style="padding-top: 40px">This presentation is available at <a href="http://zoffix.com/TMP2015">TPM2015.zoffix.com</a></p>
+                </section>
+
+				<section>
+					<h2>It's not just a Web Framework</h2>
+
+                    <ul class="shy">
+                        <li>
+                            <code class="module">Mojo::Collection</code>&mdash;Item collection
+                        </li>
+                        <li>
+                            <code class="module">Mojo::DOM</code>&mdash;HTML Parser
+                        </li>
+                        <li>
+                            <code class="module">Mojo::URL</code>&mdash;Uniform Resource Locator
+                        </li>
+                        <li>
+                            <code class="module">Mojo::UserAgent</code>&mdash;Non-blocking UA
+                        </li>
+                        <li>
+                            <code class="module">Mojo::Util</code> - Portable utility functions
+                        </li>
+                        <li>
+                            <code class="module">Mojo::ByteStream</code>&mdash;ByteStream
+                        </li>
+                        <li>
+                            <code class="module">Mojo::Base</code>&mdash;Minimal base class
+                        </li>
+                        <li><i>...and several more</i></li>
+                    </ul>
+
+                    <p class="push">All obtained by <code>cpanm Mojolicious</code>
+                    <br>(<a href="https://metacpan.org/release/Mojolicious">https://metacpan.org/release/Mojolicious</a>)
+                    </p>
+				</section>
+
+                <section>
+                    <h2>Mojo::Collection</h2>
+
+                    <p>A collection of "things".</p>
+
+                    <p>You can think of it as an "array object":
+                        <br>regular Perl array, but with methods</p>
+
+                    <pre><code class="perl">1:  my $c = Mojo::Collection->new(qw/foo bar baz baz boor ber/);
+2:
+3:  $c->grep(qr/^b/)->join(', ')->say;       # prints "bar, baz, baz, boor, ber"
+4:  say join ',', grep /^b/, @$c;            # same thing
+5:                                           # (note, we used $c as arrayref)
+6:
+7:  $c->grep(qr/^b/)->uniq->join(', ')->say; # prints "bar, baz, boor, ber"
+8:
+9:  use List::MoreUtils qw/uniq/;
+10: say join ',', uniq grep /^b/, @$c;       # same thing
+</code></pre>
+                </section>
+
+                <!--STORY-->
+
+				<section>
+                    <h2>Mojo::Collection</h2>
+
+                    <p><code class="module">List::Util</code>, <code class="module">List::MoreUtils</code>, <code class="module">List::UtilBy</code> (or was it <code class="module">List::Util<strong>s</strong>By</code>)</p>
+
+                    <p class="push"><code class="module">Mojo::Collection</code> provides many of those functions as methods: <code>compact</code>, <code>each</code>,
+                    <code>first</code>, <code>flatten</code>, <code>grep</code>, <code>join</code>,
+                    <code>last</code>, <code>map</code>, <code>reduce</code>, <code>reverse</code>, <code>slice</code>, <code>shuffle</code>, <code>size</code>,
+                    <code>sort</code>, <code>uniq</code></p>
+				</section>
+
+                <section>
+                    <h2>Mojo::DOM</h2>
+                    <p>"The BEST HTML Parser on CPAN"</p>
+
+                    <p>Reference elements you want with <a href="https://metacpan.org/pod/Mojo::DOM::CSS#SELECTORS">CSS Selectors:</a></p>
+
+<pre><code class="perl">1:   my $dom = Mojo::DOM->new( $html_code );
+2:   say $dom->at('title')->all_text; # print the &lt;title&gt; of the page
+3:
+4:   say for map $_->{href}, $dom->find('a[href]')->each; # print all links
+5:
+6:   # Put a &lt;div&gt; around each &lt;p&gt;
+7:   $dom->find('p')->each(sub{ $_->wrap('&lt;div class="panel-body"/&gt;') });
+8:   say $dom;
+9:
+10:  $dom->find('td.name')->map('all_text')->grep(qr/^B/)->uniq->join(', ')->say;
+</code></pre>
+                </section>
+
+                <section>
+                    <h2>Mojo::DOM</h2>
+
+<pre><code class="perl">1:   $dom->find('td.name')  # Returns Mojo::Collection of Mojo::DOM objects
+2:      ->map('all_text')   # Returns Mojo::Collection of plain text items
+3:      ->grep(qr/^B/)      # ---"---
+4:      ->uniq              # ---"---
+5:      ->join(', ')        # Returns Mojo::ByteStream
+6:      ->say;
+</code></pre>
+                </section>
+
+                <section>
+                    <h2>Mojo::DOM</h2>
+
+                    <p>Many methods to manipulate the DOM. Many return either <code class="module">Mojo::DOM</code> or
+                        <code class="module">Mojo::Collection</code> objects:
+                    <code>all_text</code>, <code>ancestors</code>, <code>append</code>, <code>append_content</code>, <code>at</code>, <code>attr</code>, <code>child_nodes</code>, <code>children</code>, <code>content</code>, <code>descendant_nodes</code>, <code>find</code>, <code>following</code>, <code>following_nodes</code>, <code>matches</code>, <code>namespace</code>, <code>next</code>, <code>next_node</code>, <code>parent</code>, <code>parse</code>, <code>preceding</code>, <code>preceding_nodes</code>, <code>prepend</code>, <code>prepend_content</code>, <code>previous</code>, <code>previous_node</code>, <code>remove</code>, <code>replace</code>, <code>root</code>, <code>strip</code>, <code>tag</code>, <code>tap</code>, <code>text</code>, <code>to_string</code>, <code>tree</code>, <code>type</code>, <code>val</code>, <code>wrap</code>, <code>wrap_content</code>, <code>xml</code></p>
+                </section>
+
+                <section>
+                    <h2>Mojo::UserAgent</h2>
+
+                    <p>"Non-blocking I/O HTTP and WebSocket user agent"</p>
+
+<pre><code class="perl"> 1:    my $ua = Mojo::UserAgent-&gt;new;
+ 2:
+ 3:    # Regular, blocking GET
+ 4:    $ua-&gt;get(&#39;mojolicio.us&#39;);
+ 5:
+ 6:    # Custom &quot;Accept&quot; header
+ 7:    $ua-&gt;get( &#39;http://api.travis-ci.org&#39;
+ 8:        =&gt; { Accept =&gt; &#39;application/vnd.travis-ci.2+json&#39; }
+ 9:    );
+10:
+11:    # Blocking POST a form
+12:    $ua-&gt;post( &#39;https://metacpan.org/search&#39; =&gt; form =&gt; { q =&gt; &#39;mojo&#39; } );
+13:
+14:    # JSON POST (application/json)
+15:    $ua-&gt;post(&#39;https://example.com&#39; =&gt; json =&gt; {top =&gt; &#39;secret&#39;});</code></pre>
+                </section>
+
+                <section>
+                    <h2>Mojo::UserAgent</h2>
+
+                    <p>Error checking:</p>
+
+<pre><code class="perl"> 1:    my $tx = $ua-&gt;post(
+ 2:        &#39;https://metacpan.org/search&#39; =&gt; form =&gt; { q =&gt; &#39;mojo&#39; }
+ 3:    ); # returns Mojo::Transaction::HTTP object
+ 4:
+ 5:    # Error checking
+ 6:    if ( $tx-&gt;success ) { say $tx-&gt;res-&gt;body }
+ 7:    else {
+ 8:        my $err = $tx-&gt;error;
+ 9:        die &quot;$err-&gt;{code} response: $err-&gt;{message}&quot; if $err-&gt;{code};
+10:        die &quot;Connection error: $err-&gt;{message}&quot;;
+11:    }
+</code></pre>
+                </section>
+
+                <section>
+                    <h2>Mojo::UserAgent</h2>
+
+                    <p>Error checking (sometimes this is OK):</p>
+
+<pre><code class="perl"> 1:    say $ua-&gt;get(&#39;mojolicidsdso.us&#39;)-&gt;res-&gt;dom-&gt;at(&#39;title&#39;)-&gt;text;
+ 2:
+ 3:    my $title = eval {
+ 4:        $ua-&gt;get(&#39;mojolicidsdso.us&#39;)-&gt;res-&gt;dom-&gt;at(&#39;title&#39;)-&gt;text;
+ 5:    } or die &quot;Huston, we&#39;ve got a problem!\n&quot;;
+</code></pre>
+
+                    <p>P.S.: be sure to install <a href="https://metacpan.org/pod/IO::Socket::SSL">IO::Socket::SSL</a></p>
+                </section>
+
+                <section>
+                    <h2>Mojo::UserAgent</h2>
+
+                    <p>Let's look at return values:</p>
+
+<pre><code class="perl"> 1:    $ua-&gt;get(&#39;http://example.com/&#39;)-&gt;res-&gt;dom-&gt;find(&#39;td.name&#39;)
+ 2:        -&gt;map(&#39;all_text&#39;)-&gt;grep(qr/^B/)-&gt;uniq-&gt;join(&#39;, &#39;)-&gt;say</code></pre>
+                </section>
+
+                <section>
+                    <h2>Mojo::UserAgent</h2>
+
+                    <p>Let's look at return values:</p>
+
+<pre><code class="perl"> 1:    $ua-&gt;get(&#39;http://example.com/&#39;)  # returns Mojo::Transaction::HTTP object
+ 2:        -&gt;res                        # returns Mojo::Message::Response object
+ 3:        -&gt;dom                        # returns Mojo::DOM object
+ 4:        -&gt;find(&#39;td.name&#39;)            # returns Mojo::Collection of Mojo::DOMs
+ 5:        -&gt;map(&#39;all_text&#39;)            # Same as earlier: Manipulate
+ 6:        -&gt;grep(qr/^B/)               # Mojo::Collection. Then transform it to
+ 7:        -&gt;uniq-&gt;join(&#39;, &#39;)-&gt;say      # Mojo::ByteStream and print</code></pre>
+                </section>
+
+                <section>
+                    <h2>Mojo::UserAgent</h2>
+
+                    <p>How about JSON? Just call <code>-&gt;json</code>
+                        instead of <code>-&gt;dom</code>!</p>
+
+<pre><code class="perl"> 1:    say &quot;Buy: $_&quot;
+ 2:        for $ua-&gt;get(&#39;http://api.example.com/&#39;)-&gt;res-&gt;json-&gt;{products}-&gt;@*;
+</code></pre>
+                </section>
+
+                <section>
+                    <h2>Mojo::UserAgent</h2>
+
+                    <p>How about JSON? Just call <code>-&gt;json</code>
+                        instead of <code>-&gt;dom</code>!</p>
+
+<pre><code class="perl"> 1:    say &quot;Buy: $_&quot;
+ 2:        for $ua-&gt;get(&#39;http://api.example.com/&#39;) # Mojo::Transaction::HTTP
+ 3:            -&gt;res                               # Mojo::Message::Response
+ 4:            -&gt;json                              # decode JSON
+ 5:            -&gt;{products}                        # Hashref-&gt;{products}
+ 6:            -&gt;@*                                # Postfix dereference
+</code></pre>
+                </section>
+
+                <section>
+                    <h2>Pop Quiz Time!</h2>
+                </section>
+
+                <section>
+                    <h2>Read a complete file into a variable?</h2>
+<pre><code class="perl"> 1:    # Eww
+ 2:    open my $fh, &#39;&lt;&#39;, &#39;file.txt&#39; or die $!;
+ 3:    my $data = do { local $/; &lt;$fh&gt;; };
+ 4:
+ 5:    # Nope, this module is broken:
+ 6:    use File::Slurp;
+ 7:    my $data = read_file &#39;file.txt&#39;;
+ 8:
+ 9:    # Better...
+10:    use Path::Tiny;
+11:    my $data = path(&#39;file.txt&#39;)-&gt;slurp;</code></pre>
+                </section>
+
+                <section>
+                    <h2>Dump a structure while debugging?</h2>
+<pre><code class="perl"> 1:    # This
+ 2:    use Data::Dumper;
+ 3:    say Dumper $data;
+ 4:
+ 5:    # Or this
+ 6:    use Data::Dump;
+ 7:    dd $data;
+ 8:
+ 9:    # Or this
+10:    use Acme::Dump::And::Dumper;
+11:    say DnD $data;
+</code></pre>
+                </section>
+
+
+                <section>
+                    <h2>Trim whitespace at start/end</h2>
+<pre><code class="perl"> 1:    $string =~ s/^\s+|\s+$//g;
+ 2:
+ 3:    # Or
+ 4:    $string =~ s/^\s+//;
+ 5:    $string =~ s/\s+$//;
+</code></pre>
+                </section>
+
+                <section>
+                    <h2>Escaping stuff</h2>
+<pre><code class="perl"> 1:    # URLs:
+ 2:    use URI::Encode qw/uri_encode/;
+ 3:    say uri_encode &#39;foo&amp;bar&amp;baz&#39;;
+ 4:
+ 5:    # Or
+ 6:    use URL::Encode qw/url_encode/;
+ 7:    say url_encode &#39;foo&amp;bar&amp;baz&#39;;
+ 8:
+ 9:    # HTML:
+10:    use HTML::Entities;
+11:    say encode_entities &#39;&lt;foo&gt;&#39;;
+12:
+13:    # Or
+14:    use HTML::Escape qw/escape_html/;
+15:    say escape_html &#39;&lt;foo&gt;&#39;;
+</code></pre>
+                </section>
+
+                <section>
+                    <p><img src="zoidberg.jpg" alt=""></p>
+                </section>
+
+                <section>
+                    <h2>Mojo::Util</h2>
+
+                    <p>Portable utility functions.</p>
+
+<pre><code class="perl"> 1:    use Mojo::Util qw/slurp  dumper  trim  url_escape  xml_escape/;
+ 2:
+ 3:    my $data = slurp &#39;file.txt&#39;;
+ 4:    dumper $data;
+ 5:    say trim $string;
+ 6:    say url_encode &#39;foo&amp;bar&amp;baz&#39;;
+ 7:    say xml_escape &#39;&lt;foo&gt;&#39;;
+</code></pre>
+                </section>
+
+                <section>
+                    <h2>Mojo::Util</h2>
+
+                    <p>Portable utility functions.</p>
+
+<p><code>b64_decode</code>, <code>b64_encode</code>, <code>camelize</code>, <code>class_to_file</code>, <code>class_to_path</code>, <code>decamelize</code>, <code>decode</code>, <code>deprecated</code>, <code>dumper</code>, <code>encode</code>, <code>hmac_sha1_sum</code>, <code>html_unescape</code>, <code>md5_bytes</code>, <code>md5_sum</code>, <code>monkey_patch</code>, <code>punycode_decode</code>, <code>punycode_encode</code>, <code>quote</code>, <code>secure_compare</code>, <code>sha1_bytes</code>, <code>sha1_sum</code>, <code>slurp</code>, <code>split_cookie_header</code>, <code>split_header</code>, <code>spurt</code>, <code>squish</code>, <code>steady_time</code>, <code>tablify</code>, <code>term_escape</code>, <code>trim</code>, <code>unindent</code>, <code>unquote</code>, <code>url_escape</code>, <code>url_unescape</code>, <code>xml_escape</code>, <code>xor_encode</code>, <code>xss_escape</code>
+</p>
+                </section>
+
+                <section>
+                    <img src="outta-time.jpg" alt="">
+                </section>
+
+                <section>
+                    <h2>Mojo::ByteStream</h2>
+
+                    <p>Bytes with Mojo::Util functions as methods (more or less)</p>
+
+<pre><code class="perl"> 1:    my $stream = Mojo::ByteStream-&gt;new(&#39;foo bar baz&#39;)-&gt;quote;
+ 2:    say $stream; # prints &quot;foo bar baz&quot;
+ 3:
+ 4:    # prints Zm9vIGJhciBiYXo=
+ 5:    $stream-&gt;unquote-&gt;encode(&#39;UTF-8&#39;)-&gt;b64_encode(&#39;&#39;)-&gt;say;
+</code></pre>
+                </section>
+
+                <section>
+                    <h2>Mojo::URL</h2>
+
+                    <p>Handling of URLs</p>
+
+<pre><code class="perl"> 1:    my $url
+ 2:    = Mojo::URL-&gt;new(&#39;http://zoffix:pass@example.com:3000/foo?foo=bar#23&#39;);
+ 3:
+ 4:    say $url-&gt;scheme;   # http
+ 5:    say $url-&gt;userinfo; # zoffix:pass
+ 6:    say $url-&gt;host;     # example.com
+ 7:    say $url-&gt;port;     # 3000
+ 8:    say $url-&gt;path;     # /foo
+ 9:    say $url-&gt;query;    # foo=bar
+10:    say $url-&gt;fragment; # 23
+</code></pre>
+                </section>
+
+                <section>
+                    <h2>Mojo::Base</h2>
+
+                    <p>Minimal base class</p>
+
+<pre><code class="perl"> 1:    package Cat;
+ 2:    use Mojo::Base -base;
+ 3:
+ 4:    has name =&gt; &#39;Nyan&#39;;
+ 5:    has [qw(age weight)] =&gt; 4;
+ 6:
+ 7:    #############################
+ 8:    package main;
+ 9:    use Mojo::Base -strict;
+10:
+11:    my $mew = Cat-&gt;new(name =&gt; &#39;Longcat&#39;);
+12:    say $mew-&gt;age; # prints 4;
+13:
+14:    # Set age to 3, weight to 5, and then print the new age
+15:    say $mew-&gt;age(3)-&gt;weight(5)-&gt;age;
+</code></pre>
+                </section>
+
+                <section>
+                    <h2>Mojolicious::Plugin::AssetPack</h2>
+
+                    <p>Simple way to handle SASS, LESS, CSS, JS, CoffeeScript and even SPRITES!</p>
+
+<pre><code class="perl"> 1:    $self-&gt;plugin(&#39;AssetPack&#39;);
+ 2:
+ 3:    $self-&gt;asset(
+ 4:        &#39;app.js&#39; =&gt; qw{
+ 5:            https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js
+ 6:            /js/foo.js
+ 7:            /js/baz.coffee
+ 8:            /js/many-files/*
+ 9:        },
+10:    );
+11:
+12:    # In your template:
+13:    % asset &#39;app.js&#39;
+14:
+15:    # Which turns into something like
+16:    &lt;script src=&quot;/packed/app-92bc075894ba75d5e33cf9e7d1f7f3ad.min.js&quot;&gt;&lt;/script&gt;
+</code></pre>
+                </section>
+
+
+                <section>
+                    <h2>Mojolicious::Plugin::AssetPack</h2>
+
+<pre><code class="perl"> 1:    $self-&gt;asset(
+ 2:        &#39;app.css&#39; =&gt; qw{
+ 3:            https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css
+ 4:            /css/foo.css
+ 5:            /css/baz.sass
+ 6:            /css/many-files/*
+ 7:            sprites:///images/ui
+ 8:        },
+ 9:    );
+10:
+11:    # In your template:
+12:    % asset &#39;app.css&#39;
+13:
+14:    # Which turns into something like
+15:      &lt;link href=&quot;/packed/app-c6d1dccb38089e32837cafc728bb3bba.min.css&quot;
+16:        rel=&quot;stylesheet&quot;&gt;
+</code></pre>
+                </section>
+
+                <section>
+                    <h2>Mojolicious::Plugin::AssetPack</h2>
+
+                    <p>Sprite: a collection of many images stored as a single image to reduce the number of HTTP requests:</p>
+                    <p><img src="sprites.png" alt=""></p>
+                </section>
+
+                <section>
+                    <h2>Mojolicious::Plugin::AssetPack</h2>
+
+                    <p><code class="module">AssetPack</code> automatically
+                        loads all images referenced by <code>sprites:///</code> URL (e.g. <code>sprites:///images/ui</code>), combines them into a single image, and prepares
+                        the CSS file that looks something like this:
+                    </p>
+
+                    <pre><code class="css"> 1:    .ui { background: url(ui-5200164c30fb8660952969caf0cefa3d.png)
+ 2:        no-repeat; display: inline-block; }
+ 3:    .ui.social-rss { background-position: 0px -0px;
+ 4:        width: 34px; height: 30px; }
+ 5:    .ui.social-github { background-position: 0px -30px;
+ 6:        width: 40px; height: 40px; }
+ 7:    .ui.social-chrome { background-position: 0px -70px;
+ 8:        width: 32px; height: 32px; }
+</code></pre>
+                </section>
+
+                <section>
+                    <h2>Mojolicious::Plugin::AssetPack</h2>
+
+                    <p>That means to use sprites, all we need to do is:</p>
+                    <ol>
+                        <li>Save images into a directory</li>
+                        <li>Use markup like <code class="html">&lt;a href=&quot;http://github.com&quot; class=&quot;ui social-github&quot;&gt;</code> to reference an image in the sprite</li>
+                    </ol>
+                </section>
+
+                <section>
+                    <h2>Mojolicious::Plugin::AssetPack</h2>
+
+                    <p>BTW, <code class="module">AssetPack</code> will automatically minify your CSS/JS, when your app is running in <code>production</code> <a href="https://metacpan.org/pod/Mojolicious#mode">mode</a></p>
+                </section>
+
+
+                <section>
+                    <h2>Thank You!</h2>
+
+                    <p>Questions?</p>
+                </section>
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: false,
+				progress: true,
+				history: true,
+				center: true,
+
+                width: 960,
+                height: 700,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'none',
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>

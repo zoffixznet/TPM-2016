@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8">
 
-		<title>Overview of the Mojolicious Toolkit</title>
+		<title>Wow, Perl 6!</title>
 
 		<meta name="description" content="Overview of the Mojolicious Toolkit">
 		<meta name="author" content="Zoffix Znet">
@@ -45,9 +45,9 @@
 			<div class="slides">
 				<section>
                     <p>
-                        <img src="cover.png" style="border: 0; box-shadow: none" height=200>
+                        <img src="cover.png" style="border: 0; box-shadow: none" height=300>
                     </p>
-					<h2>Overview of the Mojolicious Toolkit</h2>
+					<h2>Wow, Perl 6!</h2>
 
                     <p>
 						by Pete <i style="opacity: .5">'Zoffix Znet'</i> Evstratov
@@ -60,7 +60,7 @@
                     </p>
                     </div>
 
-                    <p style="padding-top: 20px">This presentation is available at <a href="http://zoffix.com/TMP2015">TPM2015.zoffix.com</a></p>
+                    <p style="padding-top: 20px">This presentation is available at <a href="http://zoffix.com/TMP2016">TPM2016.zoffix.com</a></p>
 				</section>
 
                 <section>
@@ -70,63 +70,95 @@
                         If you did not understand what I said or what I'm talking about, simply raise your hand.
                     </p>
 
-                    <p style="padding-top: 40px">This presentation is available at <a href="http://zoffix.com/TMP2015">TPM2015.zoffix.com</a></p>
+                    <p style="padding-top: 40px">This presentation is available at <a href="http://zoffix.com/TMP2016">TPM2016.zoffix.com</a></p>
                 </section>
 
 				<section>
-					<h2>It's not just a Web Framework</h2>
+					<h2>First, Keep In Mind:</h2>
 
+                   <h3>Perl 6 is a brand new language, so some things are...</h3>
+					
                     <ul class="shy">
                         <li>
-                            <code class="module">Mojo::Collection</code>&mdash;Item collection
+                            <code class="module">Buggy</code>&mdash;even the things I'll talk about
                         </li>
                         <li>
-                            <code class="module">Mojo::DOM</code>&mdash;HTML Parser
+                            <code class="module">Unfinished</code>&mdash;even though you can already use them
                         </li>
                         <li>
-                            <code class="module">Mojo::URL</code>&mdash;Uniform Resource Locator
+                            <code class="module">Unoptimized</code>&mdash;at times, painfully slow
                         </li>
-                        <li>
-                            <code class="module">Mojo::UserAgent</code>&mdash;Non-blocking UA
-                        </li>
-                        <li>
-                            <code class="module">Mojo::Util</code> - Portable utility functions
-                        </li>
-                        <li>
-                            <code class="module">Mojo::ByteStream</code>&mdash;ByteStream
-                        </li>
-                        <li>
-                            <code class="module">Mojo::Base</code>&mdash;Minimal base class
-                        </li>
-                        <li><i>...and several more</i></li>
                     </ul>
-
-                    <p class="push">All obtained by <code>cpanm Mojolicious</code>
-                    <br>(<a href="https://metacpan.org/release/Mojolicious">https://metacpan.org/release/Mojolicious</a>)
-                    </p>
 				</section>
 
                 <section>
-                    <h2>Mojo::Collection</h2>
+                    <h2>First, Keep In Mind:</h2>
 
-                    <p>A collection of "things".</p>
+                   <h3>The Specification is solidified, so now the core team will focus on...</h3>
 
-                    <p>You can think of it as an "array object":
-                        <br>regular Perl array, but with methods</p>
-
-                    <pre><code class="perl">1:  my $c = Mojo::Collection->new(qw/foo bar baz baz boor ber/);
-2:
-3:  $c->grep(qr/^b/)->join(', ')->say;       # prints "bar, baz, baz, boor, ber"
-4:  say join ',', grep /^b/, @$c;            # same thing
-5:                                           # (note, we used $c as arrayref)
-6:
-7:  $c->grep(qr/^b/)->uniq->join(', ')->say; # prints "bar, baz, boor, ber"
-8:
-9:  use List::MoreUtils qw/uniq/;
-10: say join ',', uniq grep /^b/, @$c;       # same thing
-</code></pre>
+                    <ul class="shy">
+                        <li>
+                            <code class="module">Fixing bugs</code>&mdash;in the things I'll talk about
+                        </li>
+                        <li>
+                            <code class="module">Finishing</code>&mdash;things you can already use
+                        </li>
+                        <li>
+                            <code class="module">Optimizing</code>&mdash;everything
+                        </li>
+                    </ul>
                 </section>
 
+                <section>
+                    <h2>Mind The Unicode:</h2>
+
+                    <p>Perl 6 lets you use fancy-pants Unicode terms and operators that you'll see in this presentation. All of them have "Texas&nbsp;variants" that use ASCII characters only. If you rather use those, see <a href="http://docs.perl6.org/language/unicode_texas">http://docs.perl6.org/language/unicode_texas</a> to find them.</p>
+                </section>
+                
+                <section>
+                    <h2>Welcome to Hyperspace!</h2>
+
+                    <h3>Hyper operators, Hyper sequence methods, Promises and Supplies, Autothreaded junctions</h3>
+                    
+                    <p><i>Punch it, Chewie.</i></p>
+
+                    <p>
+                        <img src="hyperspace.jpg" style="border: 0; box-shadow: none" height=400>
+                    </p>
+                </section>
+
+                <section>
+                    <h2>Hyper Operators</h2>
+
+                    <p>Let's say you want to print out the length of each string an an array. You may use code like this:</p>
+
+                    <pre><code class="perl">1: my @a = &lt;foo mo Joe Smoe&gt;;
+2: say @a.map: *.chars;</code></pre>
+
+                    <p>It's nice and short, but what if you want to call a more time-consuming method or wish to invoke more methods either on the array itself or on its individual elements?</p>
+                </section>
+
+                <section>
+                    <h2>Hyper Operators</h2>
+
+                    <p>Just use a hyper operator:</p>
+
+                    <pre><code class="perl">1: my @a = &lt;foo mo Joe Smoe&gt;;
+2: @a&raquo;.chars.say;</code></pre>
+
+                    <p>Put » before the dot method call and the method you're calling will be called on individual <strong>elements</strong> instead. BONUS: it's a compiler hint to use multiple threads. Further methods in the chain will be called on the array (list, etc.), unless they're hypered as well.</p>
+                </section>
+
+                <section>
+                    <h2>Hyper Seqs</h2>
+
+                    <p>What if you want to "do stuff" on a bunch of things, but on multiple cores? Loop over a <code>HyperSeq</code>:</p>
+
+                    <pre><code class="perl">1: my @a = &lt;foo mo Joe Smoe&gt;;
+2: .do-something-time-consuming for @a.hyper;</code></pre>
+
+                    <p>It's nice and short, but what if you have millions of numbers?s</p>
+                </section>
                 <!--STORY-->
 
 				<section>

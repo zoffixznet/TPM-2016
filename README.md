@@ -1,13 +1,36 @@
-# Overview of the Perl 5 Mojolicious Toolkit
+# Wow, Perl 6!
 
-The overviewed modules include
-[Mojo::Collection](https://metacpan.org/pod/Mojo::Collection),
-[Mojo::DOM](https://metacpan.org/pod/Mojo::DOM),
-[Mojo::UserAgent](https://metacpan.org/pod/Mojo::UserAgent),
-[Mojo::URL](https://metacpan.org/pod/Mojo::URL),
-[Mojo::Util](https://metacpan.org/pod/Mojo::Util),
-[Mojo::ByteStream](https://metacpan.org/pod/Mojo::ByteStream), and
-[Mojo::Base](https://metacpan.org/pod/Mojo::Base).
+An overview of Perl 6 features that will make you go "wow!"
+
+Hyperspace: Multi-core processing at a touch of a button
+* Hyper operators
+* Hyper sequence methods
+* Promises and Supplies
+* Autothreaded junctions
+
+How's Your Spellin'?
+* Grammars: Parsing made easy
+
+Couch Potato:
+* Lazy lists and their uses
+
+Molding Your Own:
+* Subsets
+* Custom operators
+* Muti-dispatch
+
+Whatever, man!:
+* Whatever Code
+* Meta operators
+* Model6 Object Model (very brief "teaser" overview)
+* Sets, bags, and mixes
+
+Polyglot:
+* NativeCall
+* Inline::Perl5
+
+Not Really Advanced Things:
+* Hacking on the Perl 6 Compiler
 
 -----
 

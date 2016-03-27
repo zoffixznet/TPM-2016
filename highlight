@@ -1,0 +1,2 @@
+#!/bin/sh
+perl -MHTML::Entities -Ci -nlE 'say encode_entities sprintf "%2d: %s", $., $_' test.p6;

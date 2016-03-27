@@ -277,6 +277,192 @@
                 </section>
 
                 <section>
+                    <h2><i>Whatever, man!</i></h2>
+                    <h3>Whatever Code, Meta operators, Model6 Object Model, Sets, bags, and mixes</h3>
+
+                    <p>
+                        <img src="whatever.png" style="border: 0; box-shadow: none" height=400>
+                    </p>
+                </section>
+
+                <section>
+                    <h2>Whatever Code</h2>
+                    <p>Use <span class="module">WhateverStar</span> as a quick way to get a closure with arguments:</p>
+                    <pre><code class="perl"> 1: say (* + 2)(2);
+ 2: say &lt;1 25 3 100&gt;.grep: * &gt; 5;
+ 3: subset Primes of Int where *.is-prime;
+ 4:
+ 5: # same as
+ 6:
+ 7: say sub { $^a + 2 }(2);
+ 8: say &lt;1 25 3 100&gt;.grep: { $_ &gt; 5 };
+ 9: subset Primes of Int where { $_.is-prime };</code></pre>
+                </section>
+
+                <section>
+                    <h2>Whatever Code</h2>
+                    <p>Each <span class="module">WhateverStar</span> represents the next positional argument. You can't use <span class="module">WhateverStar</span> to refer to the same argument more than once:</p>
+                    <pre><code class="perl">say ( * + * + * )(2, 3, 4);
+
+# OUTPUT:
+# 9</code></pre>
+                </section>
+
+                <section>
+                    <h2>Whatever Code</h2>
+                    <p>n-at-a-time <code>.map</code> never looked simpler:</p>
+                    <pre><code class="perl">say ^12 .map: * + * + *;
+
+# OUTPUT:
+# (3 12 21 30)</code></pre>
+                </section>
+
+                <section>
+                    <h2>Whatever Code</h2>
+                    <p>Look, ma! The entire Fibonacci sequence in a lazy list!</p>
+                    <pre><code class="perl">1: my  @fibonacci = 0, 1, * + * &hellip; *;
+2: say @fibonacci[42];
+
+# OUTPUT:
+# 267914296</code></pre>
+                </section>
+                
+                <section>
+                    <h2>Meta Operators</h2>
+                    <p>Same as if you placed the operator that is inside the brackets
+                    between each element in the list:</p>
+                    <pre><code class="perl"> 1: say [+] 1, 2, 3;  # 6
+ 2: say [*] 1..5;  # 120
+ 3:
+ 4: my @numbers = (2, 4, 3);
+ 5: say [&lt;] @numbers;  # False</code></pre>
+                </section>
+
+                <section>
+                    <h2>Meta Operators</h2>
+                    <p><i>Trangle Reduce</i>: use operator between two successive elements, take the result and use the operator between it and the next element:</p>
+                    <pre><code class="perl"> 1: say [\+] 1, 2, 3;
+ 2: say [\*] 1..5;
+
+ # OUTPUT:
+ # (1 3 6)  ## Breaking it down: 1 (1), 1 + 2 (3), 3 + 3 (6)
+ # (1 2 6 24 120)</code></pre>
+                </section>
+
+                <section>
+                    <h2>Model6 Object Model</h2>
+                    <pre><code class="perl"> 1: class Foo {
+ 2:     has $.attr;
+ 3:     has $.attr-rw is rw;
+ 4:     has $.attr-required is required;
+ 5:     has $!attr-private = 42;
+ 6:
+ 7:     method public   { say $!attr + $!attr-private; }
+ 8:     method !private { say &#39;secret&#39; }
+ 9: }
+10:
+11: my $foo = Foo.new: :attr&lt;public&gt;,
+13:                    :attr-required&lt;yup-here-it-is&gt;;
+14:
+15: say $foo.attr;
+16: say $foo.public;
+17: $foo.attr-rw = 42;</code></pre>
+                </section>
+
+                <section>
+                    <h2>Model6 Object Model</h2>
+
+                    <p>You can specify types and subset restrictions too:</p>
+                    <pre><code class="perl"> 1: class Foo {
+ 2:     subset Primes of IntStr where *.is-prime;
+ 3:
+ 4:     has Int    $.attr;
+ 5:     has Str    $.attr-rw is rw where *.chars &lt; 5;
+ 6:     has Primes $.attr-required is required;
+ 7: }</code></pre>
+                </section>
+
+                <section>
+                    <h2>Sets, Bags, and Mixes</h2>
+
+                    <p><strong>Immutable:</strong></p>
+                    <ul class="shy">
+                        <li>
+                            <code class="module">Set</code>&mdash;collection of distinct objects
+                        </li>
+                        <li>
+                            <code class="module">Bag</code>&mdash;collection of distinct objects with integer weights
+                        </li>
+                        <li>
+                            <code class="module">Mix</code>&mdash;collection of distinct objects with real weights
+                        </li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Sets, Bags, and Mixes</h2>
+
+                    <p><strong>Mutable:</strong></p>
+                    <ul class="shy">
+                        <li>
+                            <code class="module">SetHash</code>&mdash;collection of distinct objects
+                        </li>
+                        <li>
+                            <code class="module">BagHash</code>&mdash;collection of distinct objects with integer weights
+                        </li>
+                        <li>
+                            <code class="module">MixHash</code>&mdash;collection of distinct objects with real weights
+                        </li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Sets, Bags, and Mixes</h2>
+
+                    <p>Counting things? A <code>Bag</code> will do:</p>
+                    <pre><code class="perl">.say for 'This is just a sentence'.comb.Bag;
+
+# OUTPUT:
+# n => 2
+# a => 1
+#   => 4
+# c => 1
+# j => 1
+# s => 4
+# T => 1
+# e => 3
+# t => 2
+# i => 2
+# u => 1
+# h => 1</code></pre>
+                </section>
+
+                <section>
+                    <h2>Sets, Bags, and Mixes</h2>
+
+                    <p>Write concise code with set operators:</p>
+                    <pre><code class="perl"> 1: my $valid = set &lt;foo bar ber boor&gt;;
+ 2: my @given = &lt;foo meow bar ber&gt;;
+ 3:
+ 4: say &lsquo;Something&#39;s wrong&rsquo; unless @given &sube; $valid;</code></pre>
+ 
+                </section>
+
+                <section>
+                    <h2>Sets, Bags, and Mixes</h2>
+
+                    <p>Write concise code with set operators:</p>
+                    <pre><code class="perl"> 1: say &lt;foo bar&gt; &cup; &lt;bar meow&gt;;  # Union operator
+ 2: say &lt;foo bar&gt; &#x2296; &lt;bar meow&gt;;  # Symmetric set difference operator 
+
+ # OUTPUT:
+ # set(foo, bar, meow)
+ # set(foo, meow)</code></pre>
+                <p>See <a href="http://docs.perl6.org/language/setbagmix">the docs</a> for full list of operators.</p>
+
+                </section>
+
+                <section>
                     <h2>Thank You!</h2>
 
                     <p>Questions?</p>

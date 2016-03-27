@@ -77,7 +77,7 @@
 					<h2>First, Keep In Mind:</h2>
 
                    <h3>Perl 6 is a brand new language, so some things are...</h3>
-					
+
                     <ul class="shy">
                         <li>
                             <code class="module">Buggy</code>&mdash;even the things I'll talk about
@@ -114,12 +114,12 @@
 
                     <p>Perl 6 lets you use fancy-pants Unicode terms and operators that you'll see in this presentation. All of them have "Texas&nbsp;variants" that use ASCII characters only. If you rather use those, see <a href="http://docs.perl6.org/language/unicode_texas">http://docs.perl6.org/language/unicode_texas</a> to find them.</p>
                 </section>
-                
+
                 <section>
                     <h2>Welcome to Hyperspace!</h2>
 
                     <h3>Hyper operators, Hyper sequence methods, Promises and Supplies, Autothreaded junctions</h3>
-                    
+
                     <p><i>Punch it, Chewie.</i></p>
 
                     <p>
@@ -130,433 +130,151 @@
                 <section>
                     <h2>Hyper Operators</h2>
 
-                    <p>Let's say you want to print out the length of each string an an array. You may use code like this:</p>
+                    <p>Let's say you want to uppercase each string in your array and then break that array up into sublists of 3 elements each:</p>
 
-                    <pre><code class="perl">1: my @a = &lt;foo mo Joe Smoe&gt;;
-2: say @a.map: *.chars;</code></pre>
+                    <pre><code class="perl">1: my @a = &lt;one two three  four five six  seven eight nine&gt;;
+2: say @a.map({ .uc }).rotor: 3;
 
-                    <p>It's nice and short, but what if you want to call a more time-consuming method or wish to invoke more methods either on the array itself or on its individual elements?</p>
+# Output:
+# ((ONE TWO THREE) (FOUR FIVE SIX) (SEVEN EIGHT NINE))
+</code></pre>
+
+                    <p>It's nice and short, but what if you want to call a more time-consuming method on thousands of elements?</p>
                 </section>
 
                 <section>
                     <h2>Hyper Operators</h2>
 
-                    <p>Just use a hyper operator:</p>
+                    <p>Just use a hyper operator before the method call:</p>
 
-                    <pre><code class="perl">1: my @a = &lt;foo mo Joe Smoe&gt;;
-2: @a&raquo;.chars.say;</code></pre>
+                    <pre><code class="perl">1: my @a = &lt;one two three  four five six  seven eight nine&gt;;
+2: say @a&raquo;.uc.rotor: 3;
 
-                    <p>Put » before the dot method call and the method you're calling will be called on individual <strong>elements</strong> instead. BONUS: it's a compiler hint to use multiple threads. Further methods in the chain will be called on the array (list, etc.), unless they're hypered as well.</p>
+# OUTPUT:
+# ((ONE TWO THREE) (FOUR FIVE SIX) (SEVEN EIGHT NINE))</code></pre>
+
+                    <p>Put » before the dot method call and the method you're calling will be called on individual <strong>elements</strong> instead.
+					 Further methods in the chain will be called on the array (list, etc.), unless they're hypered as well.</p>
+
+					<p><strong style="color: blue">BONUS:</strong> it's a compiler hint to use <strong>multiple threads.</strong></p>
                 </section>
 
                 <section>
                     <h2>Hyper Seqs</h2>
 
-                    <p>What if you want to "do stuff" on a bunch of things, but on multiple cores? Loop over a <code>HyperSeq</code>:</p>
-
-                    <pre><code class="perl">1: my @a = &lt;foo mo Joe Smoe&gt;;
-2: .do-something-time-consuming for @a.hyper;</code></pre>
-
-                    <p>It's nice and short, but what if you have millions of numbers?s</p>
+                    <p>What if you want to "do stuff" on a bunch of things, but on multiple cores? Loop over a <code>HyperSeq</code>.
+					You get one by calling either:</p>
+                    <ul class="shy">
+                        <li>
+							<code class="module">.hyper</code>&mdash;preserves element order
+                        </li>
+                        <li>
+                            <code class="module">.race</code>&mdash;does not preserve element order
+                        </li>
+                    </ul>
                 </section>
                 <!--STORY-->
 
 				<section>
-                    <h2>Mojo::Collection</h2>
+                    <h2>Hyper Seqs</h2>
+					<p>Iterate over a 4-element sequence, sleep for 1 second for each element:</p>
+					<pre><code class="perl">1: for (1..4).race( batch =&gt; 1 ) {
+2:     say &quot;Doing $_&quot;;
+3:     sleep 1;
+4: }
+5: say &quot;Code took {now - INIT now} seconds to run&quot;;
 
-                    <p><code class="module">List::Util</code>, <code class="module">List::MoreUtils</code>, <code class="module">List::UtilBy</code> (or was it <code class="module">List::Util<strong>s</strong>By</code>)</p>
-
-                    <p class="push"><code class="module">Mojo::Collection</code> provides many of those functions as methods: <code>compact</code>, <code>each</code>,
-                    <code>first</code>, <code>flatten</code>, <code>grep</code>, <code>join</code>,
-                    <code>last</code>, <code>map</code>, <code>reduce</code>, <code>reverse</code>, <code>slice</code>, <code>shuffle</code>, <code>size</code>,
-                    <code>sort</code>, <code>uniq</code></p>
-				</section>
-
-                <section>
-                    <h2>Mojo::DOM</h2>
-                    <p>"The BEST HTML Parser on CPAN"</p>
-
-                    <p>Reference elements you want with <a href="https://metacpan.org/pod/Mojo::DOM::CSS#SELECTORS">CSS Selectors:</a></p>
-
-<pre><code class="perl">1:   my $dom = Mojo::DOM->new( $html_code );
-2:   say $dom->at('title')->all_text; # print the &lt;title&gt; of the page
-3:
-4:   say for map $_->{href}, $dom->find('a[href]')->each; # print all links
-5:
-6:   # Put a &lt;div&gt; around each &lt;p&gt;
-7:   $dom->find('p')->each(sub{ $_->wrap('&lt;div class="panel-body"/&gt;') });
-8:   say $dom;
-9:
-10:  $dom->find('td.name')->map('all_text')->grep(qr/^B/)->uniq->join(', ')->say;
-</code></pre>
+# OUTPUT:
+# Doing 1
+# Doing 3
+# Doing 2
+# Doing 4
+# Code took 1.0090415 seconds to run</code></pre>
+					<p>Code runs for just over 1 second!</p>
                 </section>
 
-                <section>
-                    <h2>Mojo::DOM</h2>
-
-<pre><code class="perl">1:   $dom->find('td.name')  # Returns Mojo::Collection of Mojo::DOM objects
-2:      ->map('all_text')   # Returns Mojo::Collection of plain text items
-3:      ->grep(qr/^B/)      # ---"---
-4:      ->uniq              # ---"---
-5:      ->join(', ')        # Returns Mojo::ByteStream
-6:      ->say;
-</code></pre>
+				<section>
+                    <h2>Hyper Seqs</h2>
+					<p><code>.hyper</code> is the same, but it preserves the order of elements in the end sequence.</p>
                 </section>
 
-                <section>
-                    <h2>Mojo::DOM</h2>
+				<section>
+                    <h2>Autothreaded junctions</h2>
+					<h3>Logical superposition of values</h3>
+					<p>Code with some logical checks:</p>
+					<pre><code class="perl">1: my @valid = &lt;foo bar baz&gt;;
+2: my $what = &#39;ber&#39;;
+3: say &quot;$what is not valid&quot; if not @valid.grep: { $what eq $_ };
+4: say &quot;A ber or a bar&quot;     if $what eq &#39;ber&#39; or $what eq &#39;bar&#39;;
 
-                    <p>Many methods to manipulate the DOM. Many return either <code class="module">Mojo::DOM</code> or
-                        <code class="module">Mojo::Collection</code> objects:
-                    <code>all_text</code>, <code>ancestors</code>, <code>append</code>, <code>append_content</code>, <code>at</code>, <code>attr</code>, <code>child_nodes</code>, <code>children</code>, <code>content</code>, <code>descendant_nodes</code>, <code>find</code>, <code>following</code>, <code>following_nodes</code>, <code>matches</code>, <code>namespace</code>, <code>next</code>, <code>next_node</code>, <code>parent</code>, <code>parse</code>, <code>preceding</code>, <code>preceding_nodes</code>, <code>prepend</code>, <code>prepend_content</code>, <code>previous</code>, <code>previous_node</code>, <code>remove</code>, <code>replace</code>, <code>root</code>, <code>strip</code>, <code>tag</code>, <code>tap</code>, <code>text</code>, <code>to_string</code>, <code>tree</code>, <code>type</code>, <code>val</code>, <code>wrap</code>, <code>wrap_content</code>, <code>xml</code></p>
+# OUTPUT:
+# ber is not valid
+# A ber or a bar</code></pre>
                 </section>
 
-                <section>
-                    <h2>Mojo::UserAgent</h2>
+				<section>
+                    <h2>Autothreaded junctions</h2>
+					<pre><code class="perl">1: my @valid = &lt;foo bar baz&gt;;
+2: my $what = &#39;ber&#39;;
+3: say &quot;$what is not valid&quot; if $what eq none @valid;
+4: say &quot;A ber or a bar&quot;     if $what eq &#39;ber&#39; | &#39;bar&#39;;
 
-                    <p>"Non-blocking I/O HTTP and WebSocket user agent"</p>
-
-<pre><code class="perl"> 1:    my $ua = Mojo::UserAgent-&gt;new;
- 2:
- 3:    # Regular, blocking GET
- 4:    $ua-&gt;get(&#39;mojolicio.us&#39;);
- 5:
- 6:    # Custom &quot;Accept&quot; header
- 7:    $ua-&gt;get( &#39;http://api.travis-ci.org&#39;
- 8:        =&gt; { Accept =&gt; &#39;application/vnd.travis-ci.2+json&#39; }
- 9:    );
-10:
-11:    # Blocking POST a form
-12:    $ua-&gt;post( &#39;https://metacpan.org/search&#39; =&gt; form =&gt; { q =&gt; &#39;mojo&#39; } );
-13:
-14:    # JSON POST (application/json)
-15:    $ua-&gt;post(&#39;https://example.com&#39; =&gt; json =&gt; {top =&gt; &#39;secret&#39;});</code></pre>
+# OUTPUT:
+# ber is not valid
+# A ber or a bar</code></pre>
                 </section>
 
-                <section>
-                    <h2>Mojo::UserAgent</h2>
-
-                    <p>Error checking:</p>
-
-<pre><code class="perl"> 1:    my $tx = $ua-&gt;post(
- 2:        &#39;https://metacpan.org/search&#39; =&gt; form =&gt; { q =&gt; &#39;mojo&#39; }
- 3:    ); # returns Mojo::Transaction::HTTP object
- 4:
- 5:    # Error checking
- 6:    if ( $tx-&gt;success ) { say $tx-&gt;res-&gt;body }
- 7:    else {
- 8:        my $err = $tx-&gt;error;
- 9:        die &quot;$err-&gt;{code} response: $err-&gt;{message}&quot; if $err-&gt;{code};
-10:        die &quot;Connection error: $err-&gt;{message}&quot;;
-11:    }
-</code></pre>
+				<section>
+                    <h2>Autothreaded junctions</h2>
+					<table class="real-table">
+<thead><tr>
+<th>type</th> <th>constructor</th> <th>operator</th> <th>True if ...</th>
+</tr></thead>
+<tbody>
+<tr> <td>all</td> <td>all</td> <td>&amp;</td> <td>no value evaluates to False</td> </tr> <tr> <td>any</td> <td>any</td> <td>|</td> <td>at least one value evaluates to True</td> </tr> <tr> <td>one</td> <td>one</td> <td>^</td> <td>exactly one value evaluates to True</td> </tr> <tr> <td>none</td> <td>none</td> <td></td> <td>no value evaluates to True</td> </tr>
+</tbody>
+</table>
                 </section>
 
-                <section>
-                    <h2>Mojo::UserAgent</h2>
-
-                    <p>Error checking (sometimes this is OK):</p>
-
-<pre><code class="perl"> 1:    say $ua-&gt;get(&#39;mojolicidsdso.us&#39;)-&gt;res-&gt;dom-&gt;at(&#39;title&#39;)-&gt;text;
- 2:
- 3:    my $title = eval {
- 4:        $ua-&gt;get(&#39;mojolicidsdso.us&#39;)-&gt;res-&gt;dom-&gt;at(&#39;title&#39;)-&gt;text;
- 5:    } or die &quot;Huston, we&#39;ve got a problem!\n&quot;;
-</code></pre>
-
-                    <p>P.S.: be sure to install <a href="https://metacpan.org/pod/IO::Socket::SSL">IO::Socket::SSL</a></p>
+				<section>
+                    <h2>Autothreaded junctions</h2>
+					<p>Best part? Junctions are autothreaded, meaning they are a <i>hint</i> to the compiler it can evaluate them on multiple threads!</p>
                 </section>
 
-                <section>
-                    <h2>Mojo::UserAgent</h2>
-
-                    <p>Let's look at return values:</p>
-
-<pre><code class="perl"> 1:    $ua-&gt;get(&#39;http://example.com/&#39;)-&gt;res-&gt;dom-&gt;find(&#39;td.name&#39;)
- 2:        -&gt;map(&#39;all_text&#39;)-&gt;grep(qr/^B/)-&gt;uniq-&gt;join(&#39;, &#39;)-&gt;say</code></pre>
+				<section>
+                    <h2>Couch Potato: Lazy lists and their uses</h2>
+					<p>
+						<img src="couch-potato.jpg" style="border: 0; box-shadow: none" height=400>
+					</p>
                 </section>
 
-                <section>
-                    <h2>Mojo::UserAgent</h2>
+				<section>
+                    <h2>Lazy Lists</h2>
+					<p>Let's do something crazy... like create an INFINITE LIST!!</p>
 
-                    <p>Let's look at return values:</p>
+					<pre><code class="perl">1: my @to-infinity-and-beyond = 0, 2 &hellip; &infin;;
+2: say @to-infinity-and-beyond[1008];
 
-<pre><code class="perl"> 1:    $ua-&gt;get(&#39;http://example.com/&#39;)  # returns Mojo::Transaction::HTTP object
- 2:        -&gt;res                        # returns Mojo::Message::Response object
- 3:        -&gt;dom                        # returns Mojo::DOM object
- 4:        -&gt;find(&#39;td.name&#39;)            # returns Mojo::Collection of Mojo::DOMs
- 5:        -&gt;map(&#39;all_text&#39;)            # Same as earlier: Manipulate
- 6:        -&gt;grep(qr/^B/)               # Mojo::Collection. Then transform it to
- 7:        -&gt;uniq-&gt;join(&#39;, &#39;)-&gt;say      # Mojo::ByteStream and print</code></pre>
+# OUTPUT:
+# 2016</code></pre>
                 </section>
 
-                <section>
-                    <h2>Mojo::UserAgent</h2>
+				<section>
+                    <h2>Lazy Lists</h2>
+					<p>Something more useful: working with a giant file:</p>
 
-                    <p>How about JSON? Just call <code>-&gt;json</code>
-                        instead of <code>-&gt;dom</code>!</p>
+					<pre><code class="perl">1: for &#39;/tmp/4GB-file.txt&#39;.IO.words {
+2:     .say;
+3:     last if ++$ == 3;
+4: }
+5: say &quot;Code took {now - INIT now} seconds to run&quot;;
 
-<pre><code class="perl"> 1:    say &quot;Buy: $_&quot;
- 2:        for $ua-&gt;get(&#39;http://api.example.com/&#39;)-&gt;res-&gt;json-&gt;{products}-&gt;@*;
-</code></pre>
+# OUTPUT:
+# foo
+# bar
+# ber
+# Code took 0.0126666 seconds to run</code></pre>
                 </section>
-
-                <section>
-                    <h2>Mojo::UserAgent</h2>
-
-                    <p>How about JSON? Just call <code>-&gt;json</code>
-                        instead of <code>-&gt;dom</code>!</p>
-
-<pre><code class="perl"> 1:    say &quot;Buy: $_&quot;
- 2:        for $ua-&gt;get(&#39;http://api.example.com/&#39;) # Mojo::Transaction::HTTP
- 3:            -&gt;res                               # Mojo::Message::Response
- 4:            -&gt;json                              # decode JSON
- 5:            -&gt;{products}                        # Hashref-&gt;{products}
- 6:            -&gt;@*                                # Postfix dereference
-</code></pre>
-                </section>
-
-                <section>
-                    <h2>Pop Quiz Time!</h2>
-                </section>
-
-                <section>
-                    <h2>Read a complete file into a variable?</h2>
-<pre><code class="perl"> 1:    # Eww
- 2:    open my $fh, &#39;&lt;&#39;, &#39;file.txt&#39; or die $!;
- 3:    my $data = do { local $/; &lt;$fh&gt;; };
- 4:
- 5:    # Nope, this module is broken:
- 6:    use File::Slurp;
- 7:    my $data = read_file &#39;file.txt&#39;;
- 8:
- 9:    # Better...
-10:    use Path::Tiny;
-11:    my $data = path(&#39;file.txt&#39;)-&gt;slurp;</code></pre>
-                </section>
-
-                <section>
-                    <h2>Dump a structure while debugging?</h2>
-<pre><code class="perl"> 1:    # This
- 2:    use Data::Dumper;
- 3:    say Dumper $data;
- 4:
- 5:    # Or this
- 6:    use Data::Dump;
- 7:    dd $data;
- 8:
- 9:    # Or this
-10:    use Acme::Dump::And::Dumper;
-11:    say DnD $data;
-</code></pre>
-                </section>
-
-
-                <section>
-                    <h2>Trim whitespace at start/end</h2>
-<pre><code class="perl"> 1:    $string =~ s/^\s+|\s+$//g;
- 2:
- 3:    # Or
- 4:    $string =~ s/^\s+//;
- 5:    $string =~ s/\s+$//;
-</code></pre>
-                </section>
-
-                <section>
-                    <h2>Escaping stuff</h2>
-<pre><code class="perl"> 1:    # URLs:
- 2:    use URI::Encode qw/uri_encode/;
- 3:    say uri_encode &#39;foo&amp;bar&amp;baz&#39;;
- 4:
- 5:    # Or
- 6:    use URL::Encode qw/url_encode/;
- 7:    say url_encode &#39;foo&amp;bar&amp;baz&#39;;
- 8:
- 9:    # HTML:
-10:    use HTML::Entities;
-11:    say encode_entities &#39;&lt;foo&gt;&#39;;
-12:
-13:    # Or
-14:    use HTML::Escape qw/escape_html/;
-15:    say escape_html &#39;&lt;foo&gt;&#39;;
-</code></pre>
-                </section>
-
-                <section>
-                    <p><img src="zoidberg.jpg" alt=""></p>
-                </section>
-
-                <section>
-                    <h2>Mojo::Util</h2>
-
-                    <p>Portable utility functions.</p>
-
-<pre><code class="perl"> 1:    use Mojo::Util qw/slurp  dumper  trim  url_escape  xml_escape/;
- 2:
- 3:    my $data = slurp &#39;file.txt&#39;;
- 4:    dumper $data;
- 5:    say trim $string;
- 6:    say url_encode &#39;foo&amp;bar&amp;baz&#39;;
- 7:    say xml_escape &#39;&lt;foo&gt;&#39;;
-</code></pre>
-                </section>
-
-                <section>
-                    <h2>Mojo::Util</h2>
-
-                    <p>Portable utility functions.</p>
-
-<p><code>b64_decode</code>, <code>b64_encode</code>, <code>camelize</code>, <code>class_to_file</code>, <code>class_to_path</code>, <code>decamelize</code>, <code>decode</code>, <code>deprecated</code>, <code>dumper</code>, <code>encode</code>, <code>hmac_sha1_sum</code>, <code>html_unescape</code>, <code>md5_bytes</code>, <code>md5_sum</code>, <code>monkey_patch</code>, <code>punycode_decode</code>, <code>punycode_encode</code>, <code>quote</code>, <code>secure_compare</code>, <code>sha1_bytes</code>, <code>sha1_sum</code>, <code>slurp</code>, <code>split_cookie_header</code>, <code>split_header</code>, <code>spurt</code>, <code>squish</code>, <code>steady_time</code>, <code>tablify</code>, <code>term_escape</code>, <code>trim</code>, <code>unindent</code>, <code>unquote</code>, <code>url_escape</code>, <code>url_unescape</code>, <code>xml_escape</code>, <code>xor_encode</code>, <code>xss_escape</code>
-</p>
-                </section>
-
-                <section>
-                    <img src="outta-time.jpg" alt="">
-                </section>
-
-                <section>
-                    <h2>Mojo::ByteStream</h2>
-
-                    <p>Bytes with Mojo::Util functions as methods (more or less)</p>
-
-<pre><code class="perl"> 1:    my $stream = Mojo::ByteStream-&gt;new(&#39;foo bar baz&#39;)-&gt;quote;
- 2:    say $stream; # prints &quot;foo bar baz&quot;
- 3:
- 4:    # prints Zm9vIGJhciBiYXo=
- 5:    $stream-&gt;unquote-&gt;encode(&#39;UTF-8&#39;)-&gt;b64_encode(&#39;&#39;)-&gt;say;
-</code></pre>
-                </section>
-
-                <section>
-                    <h2>Mojo::URL</h2>
-
-                    <p>Handling of URLs</p>
-
-<pre><code class="perl"> 1:    my $url
- 2:    = Mojo::URL-&gt;new(&#39;http://zoffix:pass@example.com:3000/foo?foo=bar#23&#39;);
- 3:
- 4:    say $url-&gt;scheme;   # http
- 5:    say $url-&gt;userinfo; # zoffix:pass
- 6:    say $url-&gt;host;     # example.com
- 7:    say $url-&gt;port;     # 3000
- 8:    say $url-&gt;path;     # /foo
- 9:    say $url-&gt;query;    # foo=bar
-10:    say $url-&gt;fragment; # 23
-</code></pre>
-                </section>
-
-                <section>
-                    <h2>Mojo::Base</h2>
-
-                    <p>Minimal base class</p>
-
-<pre><code class="perl"> 1:    package Cat;
- 2:    use Mojo::Base -base;
- 3:
- 4:    has name =&gt; &#39;Nyan&#39;;
- 5:    has [qw(age weight)] =&gt; 4;
- 6:
- 7:    #############################
- 8:    package main;
- 9:    use Mojo::Base -strict;
-10:
-11:    my $mew = Cat-&gt;new(name =&gt; &#39;Longcat&#39;);
-12:    say $mew-&gt;age; # prints 4;
-13:
-14:    # Set age to 3, weight to 5, and then print the new age
-15:    say $mew-&gt;age(3)-&gt;weight(5)-&gt;age;
-</code></pre>
-                </section>
-
-                <section>
-                    <h2>Mojolicious::Plugin::AssetPack</h2>
-
-                    <p>Simple way to handle SASS, LESS, CSS, JS, CoffeeScript and even SPRITES!</p>
-
-<pre><code class="perl"> 1:    $self-&gt;plugin(&#39;AssetPack&#39;);
- 2:
- 3:    $self-&gt;asset(
- 4:        &#39;app.js&#39; =&gt; qw{
- 5:            https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js
- 6:            /js/foo.js
- 7:            /js/baz.coffee
- 8:            /js/many-files/*
- 9:        },
-10:    );
-11:
-12:    # In your template:
-13:    % asset &#39;app.js&#39;
-14:
-15:    # Which turns into something like
-16:    &lt;script src=&quot;/packed/app-92bc075894ba75d5e33cf9e7d1f7f3ad.min.js&quot;&gt;&lt;/script&gt;
-</code></pre>
-                </section>
-
-
-                <section>
-                    <h2>Mojolicious::Plugin::AssetPack</h2>
-
-<pre><code class="perl"> 1:    $self-&gt;asset(
- 2:        &#39;app.css&#39; =&gt; qw{
- 3:            https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css
- 4:            /css/foo.css
- 5:            /css/baz.sass
- 6:            /css/many-files/*
- 7:            sprites:///images/ui
- 8:        },
- 9:    );
-10:
-11:    # In your template:
-12:    % asset &#39;app.css&#39;
-13:
-14:    # Which turns into something like
-15:      &lt;link href=&quot;/packed/app-c6d1dccb38089e32837cafc728bb3bba.min.css&quot;
-16:        rel=&quot;stylesheet&quot;&gt;
-</code></pre>
-                </section>
-
-                <section>
-                    <h2>Mojolicious::Plugin::AssetPack</h2>
-
-                    <p>Sprite: a collection of many images stored as a single image to reduce the number of HTTP requests:</p>
-                    <p><img src="sprites.png" alt=""></p>
-                </section>
-
-                <section>
-                    <h2>Mojolicious::Plugin::AssetPack</h2>
-
-                    <p><code class="module">AssetPack</code> automatically
-                        loads all images referenced by <code>sprites:///</code> URL (e.g. <code>sprites:///images/ui</code>), combines them into a single image, and prepares
-                        the CSS file that looks something like this:
-                    </p>
-
-                    <pre><code class="css"> 1:    .ui { background: url(ui-5200164c30fb8660952969caf0cefa3d.png)
- 2:        no-repeat; display: inline-block; }
- 3:    .ui.social-rss { background-position: 0px -0px;
- 4:        width: 34px; height: 30px; }
- 5:    .ui.social-github { background-position: 0px -30px;
- 6:        width: 40px; height: 40px; }
- 7:    .ui.social-chrome { background-position: 0px -70px;
- 8:        width: 32px; height: 32px; }
-</code></pre>
-                </section>
-
-                <section>
-                    <h2>Mojolicious::Plugin::AssetPack</h2>
-
-                    <p>That means to use sprites, all we need to do is:</p>
-                    <ol>
-                        <li>Save images into a directory</li>
-                        <li>Use markup like <code class="html">&lt;a href=&quot;http://github.com&quot; class=&quot;ui social-github&quot;&gt;</code> to reference an image in the sprite</li>
-                    </ol>
-                </section>
-
-                <section>
-                    <h2>Mojolicious::Plugin::AssetPack</h2>
-
-                    <p>BTW, <code class="module">AssetPack</code> will automatically minify your CSS/JS, when your app is running in <code>production</code> <a href="https://metacpan.org/pod/Mojolicious#mode">mode</a></p>
-                </section>
-
 
                 <section>
                     <h2>Thank You!</h2>

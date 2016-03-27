@@ -45,3 +45,12 @@ code {
     border: 1px solid #000!important;
     box-shadow: none!important;
 }
+
+table.real-table {
+    border-collapse: collapse;
+}
+table.real-table td,
+table.real-table th {
+    border: 1px solid #999;
+    padding: 3px 5px;
+}

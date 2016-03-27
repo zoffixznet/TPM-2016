@@ -1,3 +1,5 @@
-my @a = <foo mo Joe Smoe>;
-.do-something-time-consuming-return-ordered for @a.hyper;
-.do-something-time-consuming-return-whatever for @a.hyper;
+for '/tmp/4GB-file.txt'.IO.words {
+    .say;
+    last if ++$ == 3;
+}
+say "Code took {now - INIT now} seconds to run";

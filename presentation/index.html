@@ -326,7 +326,7 @@
 # OUTPUT:
 # 267914296</code></pre>
                 </section>
-                
+
                 <section>
                     <h2>Meta Operators</h2>
                     <p>Same as if you placed the operator that is inside the brackets
@@ -445,7 +445,7 @@
  2: my @given = &lt;foo meow bar ber&gt;;
  3:
  4: say &lsquo;Something&#39;s wrong&rsquo; unless @given &sube; $valid;</code></pre>
- 
+
                 </section>
 
                 <section>
@@ -453,7 +453,7 @@
 
                     <p>Write concise code with set operators:</p>
                     <pre><code class="perl"> 1: say &lt;foo bar&gt; &cup; &lt;bar meow&gt;;  # Union operator
- 2: say &lt;foo bar&gt; &#x2296; &lt;bar meow&gt;;  # Symmetric set difference operator 
+ 2: say &lt;foo bar&gt; &#x2296; &lt;bar meow&gt;;  # Symmetric set difference operator
 
  # OUTPUT:
  # set(foo, bar, meow)
@@ -479,6 +479,37 @@
                     <h2>Which means...</h2>
 
                     <p>Regular Perl 6 users can make Perl 6 better!</p>
+                </section>
+
+				<section>
+                    <h2>Promises</h2>
+
+                    <p>Concurrent / asynchronous code:</p>
+                    <pre><code class="perl"></code></pre>
+
+                </section>
+
+				<section>
+                    <h2>Supplies</h2>
+
+                    <p>Asynchronous data streaming:</p>
+                    <pre><code class="perl"> 1: my $supplier = Supplier.new;
+ 2:
+ 3: $supplier.Supply              .tap(-&gt; $v { say &quot;Original: $v&quot; });
+ 4: $supplier.Supply.map(  * &times; 2 ).tap(-&gt; $v { say &quot;  Double: $v&quot; });
+ 5: $supplier.Supply.grep( * % 2 ).tap(-&gt; $v { say &quot;  Odd: $v&quot;    });
+ 6:
+ 7: $supplier.emit: $_ for ^3;
+
+# OUTPUT:
+# Original: 0
+#   Double: 0
+# Original: 1
+#   Double: 2
+#   Odd: 1
+# Original: 2
+#   Double: 4</code></pre>
+
                 </section>
 
                 <section>

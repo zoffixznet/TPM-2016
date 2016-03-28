@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Wow, Perl 6!</title>
+
+		<meta name="description" content="Overview of the Mojolicious Toolkit">
+		<meta name="author" content="Zoffix Znet">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/solarized.css" id="theme">
+        <link rel="stylesheet" href="css/theme/custom.css">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+		<script>
+			if( window.location.search.match( /print-pdf/gi ) ) {
+				var link = document.createElement( 'link' );
+				link.rel = 'stylesheet';
+				link.type = 'text/css';
+				link.href = 'css/print/pdf.css';
+				document.getElementsByTagName( 'head' )[0].appendChild( link );
+			}
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+                    <p>
+                        <img src="cover.png" style="border: 0; box-shadow: none" height=300>
+                    </p>
+					<h2>Wow, Perl 6!</h2>
+
+                    <p>
+						by Pete <i style="opacity: .5">'Zoffix Znet'</i> Evstratov
+					</p>
+
+                    <div class="intro-ref">
+                    <p>
+                        <a href="https://metacpan.org/author/ZOFFIX">https://metacpan.org/author/ZOFFIX</a>
+
+                    </p>
+                    </div>
+
+                    <p style="padding-top: 20px">This presentation is available at <a href="http://zoffix.com/TMP2016">TPM2016.zoffix.com</a></p>
+				</section>
+
+                <section>
+                    <h2>Question Policy</h2>
+
+                    <p>
+                        If you did not understand what I said or what I'm talking about, simply raise your hand.
+                    </p>
+
+                    <p style="padding-top: 40px">This presentation is available at <a href="http://zoffix.com/TMP2016">TPM2016.zoffix.com</a></p>
+                </section>
+
+                <section>
+                    <h2>Mind The Unicode:</h2>
+
+                    <p>Perl 6 lets you use fancy-pants Unicode terms and operators that you'll see in this presentation. All of them have "Texas&nbsp;variants" that use ASCII characters only. If you rather use those, see <a href="http://docs.perl6.org/language/unicode_texas">http://docs.perl6.org/language/unicode_texas</a> to find them.</p>
+                </section>
+
+                <section>
+                    <h2>Hyperspace</h2>
+					<h3>Multi-core processing at a touch of a button</h3>
+
+                    <p><i>Punch it, Chewie.</i></p>
+
+                    <p>
+                        <img src="hyperspace.jpg" style="border: 0; box-shadow: none" height=400>
+                    </p>
+                </section>
+
+				<section>
+                    <h2>Hyper Operators</h2>
+
+                    <p>They look like <code>«</code> and <code>»</code> and you might see <a href="http://perl6maven.com/tutorial/perl6-hyper-operators">them explained</a> with examples like these:</p>
+
+					<pre><code class="perl">      (1, 2) «+« (3)
+      (1, 2) »+» 1
+(1, 2, 3, 4) «+» (1, 2)</code></pre>
+                </section>
+
+				<section>
+                    <h2>Hyper Operators</h2>
+
+                    <p>Those won't be multi-threaded for a while, if at all. Instead, the variant I'll talk about is this one:
+
+					<pre><code class="perl">@foo».bar</code></pre>
+                </section>
+
+                <section>
+                    <h2>Hyper Operators</h2>
+
+                    <p>Let's say you want to uppercase each string in your array and then break that array up into sublists of 3 elements each:</p>
+
+                    <pre><code class="perl">1: my @a = &lt;one two three  four five six  seven eight nine&gt;;
+2: say @a.map({ .uc }).rotor: 3;
+
+# Output:
+# ((ONE TWO THREE) (FOUR FIVE SIX) (SEVEN EIGHT NINE))
+</code></pre>
+
+                    <p>It's nice and short, but what if you want to call a more time-consuming method on thousands of elements?</p>
+                </section>
+
+                <section>
+                    <h2>Hyper Operators</h2>
+
+                    <p>Just use a hyper operator before the method call:</p>
+
+                    <pre><code class="perl">1: my @a = &lt;one two three  four five six  seven eight nine&gt;;
+2: say @a&raquo;.uc.rotor: 3;
+
+# OUTPUT:
+# ((ONE TWO THREE) (FOUR FIVE SIX) (SEVEN EIGHT NINE))</code></pre>
+
+                    <p>Put » before the dot method call and the method you're calling will be called on individual <strong>elements</strong> instead.
+					 Further methods in the chain will be called on the array (list, etc.), unless they're hypered as well.</p>
+
+					<p><strong style="color: blue">BONUS:</strong> it's a compiler hint to use <strong>multiple threads.</strong></p>
+                </section>
+
+                <section>
+                    <h2>Hyper Seqs</h2>
+
+                    <p>What if you want to "do stuff" on a bunch of things, but on multiple cores? Loop over a <code>HyperSeq</code>.
+					You get one by calling either:</p>
+                    <ul class="shy">
+                        <li>
+							<code class="module">.hyper</code>&mdash;preserves element order
+                        </li>
+                        <li>
+                            <code class="module">.race</code>&mdash;does not preserve element order
+                        </li>
+                    </ul>
+                </section>
+                <!--STORY-->
+
+				<section>
+                    <h2>Hyper Seqs</h2>
+					<p>Iterate over a 4-element sequence, sleep for 1 second for each element:</p>
+					<pre><code class="perl">1: for (1..4).race( batch =&gt; 1 ) {
+2:     say &quot;Doing $_&quot;;
+3:     sleep 1;
+4: }
+5: say &quot;Code took {now - INIT now} seconds to run&quot;;
+
+# OUTPUT:
+# Doing 1
+# Doing 3
+# Doing 2
+# Doing 4
+# Code took 1.0090415 seconds to run</code></pre>
+					<p>Code runs for just over 1 second!</p>
+                </section>
+
+				<section>
+                    <h2>Hyper Seqs</h2>
+					<p><code>.hyper</code> is the same, but it preserves the order of elements in the resulting sequence.</p>
+                </section>
+
+				<section>
+                    <h2>Autothreaded junctions</h2>
+					<h3>Logical superposition of values</h3>
+					<p>Code with some logical checks:</p>
+					<pre><code class="perl">1: my @valid = &lt;foo bar baz&gt;;
+2: my $what = &#39;ber&#39;;
+3: say &quot;$what is not valid&quot; if not @valid.grep: { $what eq $_ };
+4: say &quot;A ber or a bar&quot;     if $what eq &#39;ber&#39; or $what eq &#39;bar&#39;;
+
+# OUTPUT:
+# ber is not valid
+# A ber or a bar</code></pre>
+                </section>
+
+				<section>
+                    <h2>Autothreaded junctions</h2>
+					<pre><code class="perl">1: my @valid = &lt;foo bar baz&gt;;
+2: my $what = &#39;ber&#39;;
+3: say &quot;$what is not valid&quot; if $what eq none @valid;
+4: say &quot;A ber or a bar&quot;     if $what eq &#39;ber&#39; | &#39;bar&#39;;
+
+# OUTPUT:
+# ber is not valid
+# A ber or a bar</code></pre>
+                </section>
+
+				<section>
+                    <h2>Autothreaded junctions</h2>
+					<table class="real-table">
+<thead><tr>
+<th>type</th> <th>constructor</th> <th>operator</th> <th>True if ...</th>
+</tr></thead>
+<tbody>
+<tr> <td>all</td> <td>all</td> <td>&amp;</td> <td>no value evaluates to False</td> </tr> <tr> <td>any</td> <td>any</td> <td>|</td> <td>at least one value evaluates to True</td> </tr> <tr> <td>one</td> <td>one</td> <td>^</td> <td>exactly one value evaluates to True</td> </tr> <tr> <td>none</td> <td>none</td> <td></td> <td>no value evaluates to True</td> </tr>
+</tbody>
+</table>
+                </section>
+
+				<section>
+                    <h2>Autothreaded junctions</h2>
+					<p>Best part? Junctions are autothreaded, meaning they are a <i>hint</i> to the compiler it can evaluate them on multiple threads!</p>
+                </section>
+
+				<section>
+                    <h2>Couch Potato: Lazy lists and their uses</h2>
+					<p>
+						<img src="couch-potato.jpg" style="border: 0; box-shadow: none" height=400>
+					</p>
+                </section>
+
+				<section>
+                    <h2>Lazy Lists</h2>
+					<p>Let's do something crazy... like create an INFINITE LIST!!</p>
+
+					<pre><code class="perl">1: my @to-infinity-and-beyond = 0, 2 &hellip; &infin;;
+2: say @to-infinity-and-beyond[1008];
+
+# OUTPUT:
+# 2016</code></pre>
+                </section>
+
+				<section>
+                    <h2>Lazy Lists</h2>
+					<p>Something more useful: working with a giant file</p>
+
+					<pre><code class="perl">1: for &#39;/tmp/4GB-file.txt&#39;.IO.words {
+2:     .say;
+3:     last if ++$ == 3;
+4: }
+5: say &quot;Code took {now - INIT now} seconds to run&quot;;
+
+# OUTPUT:
+# foo
+# bar
+# ber
+# Code took 0.0126666 seconds to run</code></pre>
+                </section>
+
+				<section>
+                    <h2>Lazy Lists</h2>
+					<p>Something more useful: working with a giant file</p>
+
+					<pre><code class="perl">1: .say for &#39;/tmp/4GB-file.txt&#39;.IO.words[0..2];
+2: say &quot;Code took {now - INIT now} seconds to run&quot;;
+
+# OUTPUT:
+# foo
+# bar
+# ber
+# Code took 0.0126666 seconds to run</code></pre>
+                </section>
+
+				<section>
+                    <h2>Molding Your Own</h2>
+					<h3>Subsets, Custom operators, Muti-dispatch</h3>
+					<p>
+						<img src="molding-your-own.jpg" style="border: 0; box-shadow: none" height=400>
+					</p>
+                </section>
+
+				<section>
+                    <h2>Subsets</h2>
+					<p>A subset of a type lets you restrict the values it accepts:</p>
+
+					<pre><code class="perl">1: subset BigPrime of Int where { $_ &gt; 10_000 and .is-prime }
+2:
+3: sub MAIN ( BigPrime $num ) {
+4:     say &quot;That&#39;s a nice-looking prime number you got there!&quot;;
+5: }</code></pre>
+
+					<pre class="shell-output"><span class="shell-command">$ perl6 test.p6 3</span>
+Usage:
+  test.p6 &lt;num&gt;
+<span class="shell-command">$ perl6 test.p6 31337</span>
+That's a nice-looking prime number you got there!
+<span class="shell-command">$ perl6 test.p6 100000</span>
+Usage:
+  test.p6 &lt;num&gt;</pre>
+                </section>
+
+				<section>
+                    <h2>Multi-Dispatch</h2>
+					<p>Multiple subs or methods of same name, but different parameters:</p>
+
+					<pre><code class="perl">1: subset Prime      of Int   where *.is-prime;
+2: subset BigPrime   of Prime where * &gt;  10_000;
+3: subset SmallPrime of Prime where * &lt;= 10_000;
+4:
+5: multi MAIN ( BigPrime   $num ) { say &quot;Prime number! Nice and big&quot;; }
+6: multi MAIN ( SmallPrime $num ) { say &quot;Puny prime number&quot;;          }
+7: multi MAIN (            $num ) { say &quot;Gimme primes!&quot;;              }</code></pre>
+
+					<pre class="shell-output"><span class="shell-command">$ perl6 test.p6 42</span>
+Gimme primes!
+<span class="shell-command">$ perl6 test.p6 7</span>
+Puny prime number
+<span class="shell-command">$ perl6 test.p6 31337</span>
+Prime number! Nice and big</pre>
+                </section>
+
+				<section>
+                    <h2>Multi-Dispatch</h2>
+					<p>Multiple subs or methods of same name, but different parameters:</p>
+
+					<pre><code class="perl">1: class Numbers {
+2:     multi method id ( Numeric $num ) { say &quot;$num is a number&quot;       }
+3:     multi method id (         $num ) { say &quot;$num is something else&quot; }
+4: }
+5: Numbers.new.id: &pi;;
+6: Numbers.new.id: &#39;blah&#39;;
+
+# OUTPUT:
+# 3.14159265358979 is a number
+# blah is something else
+</code></pre>
+                </section>
+
+				<section>
+                    <h2>Multi-Dispatch</h2>
+					<p>Extend method functionality:</p>
+
+					<pre><code class="perl"> 1: class Numbers {
+ 2:     multi method id ( Numeric $num ) { say &quot;$num is a number&quot;       }
+ 3:     multi method id (         $num ) { say &quot;$num is something else&quot; }
+ 4: }
+ 5:
+ 6: class SmarterNumbers is Numbers {
+ 7:     multi method id ( Numeric $num where * == &pi; ) { say &quot;Mmmm yummy pie!&quot; }
+ 8: }
+ 9:
+10: SmarterNumbers.new.id: 42;
+11: SmarterNumbers.new.id: &pi;;
+12: SmarterNumbers.new.id: &#39;blah&#39;;
+
+# OUTPUT:
+# 42 is a number
+# Mmmm yummy pie!
+# blah is something else
+</code></pre>
+                </section>
+
+				<section>
+                    <h2>Custom Terms and Operators</h2>
+					<p>
+						<img src="custom-ops.png" style="border: 0; box-shadow: none" height=400>
+					</p>
+                </section>
+
+				<section>
+                    <h2>Custom Terms and Operators</h2>
+					<pre><code class="perl">1: sub infix:&lt;&macr;\(&deg;_o)/&macr;&gt; {
+2:     ($^a, $^b).pick
+3: }
+4:
+5: say &#39;Coke&#39; &macr;\(&deg;_o)/&macr; &#39;Pepsi&#39;;
+
+# OUTPUT:
+# Pepsi
+</code></pre>
+				<p>Operator categories: <code>infix</code>, <code>prefix</code>, <code>postfix</code>, <code>circumfix</code>, <code>postcircumfix</code> and you can also use <code>term</code> for terms.</p>
+                </section>
+
+				<section>
+                    <h2>Custom Terms and Operators</h2>
+					<pre><code class="perl"> 1: sub prefix:&lt;&sum;&gt; (*@els) { @els.sum }
+ 2: say &sum; 1, 2, 3, 4;
+
+# OUTPUT:
+# 1234
+</code></pre>
+				<p>Doesn't seem to work well...</p>
+                </section>
+
+				<section>
+                    <h2>Custom Terms and Operators</h2>
+					<pre><code class="perl"> 1: sub prefix:&lt;&sum;&gt; (*@els) is looser(&amp;infix:&lt;,&gt;) { @els.sum }
+ 2: say &sum; 1, 2, 3, 4;
+
+# OUTPUT:
+# 10
+</code></pre>
+                </section>
+
+				<section>
+                    <h2>Custom Terms and Operators</h2>
+					<p>More examples:</p>
+					<pre><code class="perl"> 1: sub term:&lt;&xi;&gt; { (^10 + 1).pick; }
+ 2: sub postcircumfix:&lt;&#x2768;  &#x2769;&gt; ($pre, $inside) is rw {
+ 3:     $pre{$inside};
+ 4: }
+ 5:
+ 6: my %hash = :foo&lt;bar&gt;, :meow&lt;moo&gt;;
+ 7: %hash&#x2768;&#39;foo&#39;&#x2769;  = &xi;;
+ 8: %hash&#x2768;&#39;meow&#39;&#x2769; = &xi;;
+ 9:
+10: say %hash;
+
+# OUTPUT:
+# foo => 6, meow => 8
+</code></pre>
+                </section>
+
+				<section>
+                    <h2>Custom Terms and Operators</h2>
+					<p>Overriding existing operators:</p>
+					<pre><code class="perl"> 1: sub infix:&lt;+&gt; { $^a - $^b };
+ 2: say 2 + 2;
+
+# OUTPUT:
+# 0</code></pre>
+				<p>
+					<img src="evil-operators.png" style="border: 0; box-shadow: none" height=400>
+				</p>
+                </section>
+
+				<section>
+					<h2>Custom Terms and Operators</h2>
+					<p>Don't worry... this effect is <strong>lexically scoped!</strong></p>
+				<p>
+					<img src="evil-operators-sad.png" style="border: 0; box-shadow: none" height=400>
+				</p>
+				</section>
+
+				<section>
+                    <h2>Custom Terms and Operators</h2>
+					<p>Overriding existing operators:</p>
+					<pre><code class="perl"> 1: class Thingamagig { has $.value };
+ 2:
+ 3: multi infix:&lt;~&gt; (Thingamagig $a, Str $b) {
+ 4:     $a.value ~ $b
+ 5: }
+ 6:
+ 7: my $thing = Thingamagig.new: value =&gt; &#39;thingamagig&#39;;
+ 8: say &#39;foo&#39; ~ &#39;bar&#39;;
+ 9: say $thing ~ &#39;bar&#39;;
+10: say &#39;bar&#39; ~ $thing;
+
+# OUTPUT:
+# foobar
+# thingamagigbar
+# barThingamagig&lt;139870715547680&gt;</code></pre>
+
+				<p>
+					See <a href="https://github.com/zoffixznet/perl6-Color/blob/master/lib/Color/Operators.pm6">Color::Operators</a> module from <span class="module">Color</span> distribution for more examples.
+				</p>
+
+                </section>
+
+                <section>
+                    <h2>Thank You!</h2>
+
+                    <p>Questions?</p>
+                </section>
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: false,
+				progress: true,
+				history: true,
+				center: true,
+
+                width: 960,
+                height: 700,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'none',
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>

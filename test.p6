@@ -1,6 +1,22 @@
-use Inline::Perl5;
-use Mojo::DOM:from<Perl5>;
+my $c = Channel.new;
+start {
+    loop { say "$c.receive() at {now - INIT now}" }
+}
+await ^10 .map: -> $r {
+    start {
+         sleep $r;
+         $c.send: $r;
+    }
+}
+$c.close;
 
-my $dom = Mojo::DOM.new: '<p><b>This is awesome</b>, trust me</p>';
 
-say $dom.at('b').all_text;
+=finish
+
+my $supplier = Supplier.new;
+
+$supplier.Supply              .tap(-> $v { say "Original: $v" });
+$supplier.Supply.map(  * × 2 ).tap(-> $v { say "  Double: $v" });
+$supplier.Supply.grep( * % 2 ).tap(-> $v { say "  Odd: $v"    });
+
+$supplier.emit: $_ for ^3;

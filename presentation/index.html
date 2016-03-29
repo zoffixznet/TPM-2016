@@ -55,8 +55,9 @@
 
                     <div class="intro-ref">
                     <p>
-                        <a href="https://metacpan.org/author/ZOFFIX">https://metacpan.org/author/ZOFFIX</a>
-
+                        <a href="https://metacpan.org/author/ZOFFIX"><img src="metacpan-icon.png" alt="" style="border: 0!important; display: inline!important;"> https://metacpan.org/author/ZOFFIX</a>
+						&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+						<a href="https://twitter.com/zoffix/"><img src="twitter-128.png" alt="" height=25 style="border: 0!important; display: inline!important; vertical-align: -.1em;"> @zoffix</a>
                     </p>
                     </div>
 
@@ -73,58 +74,285 @@
                     <p style="padding-top: 40px">This presentation is available at <a href="http://zoffix.com/TMP2016">TPM2016.zoffix.com</a></p>
                 </section>
 
-				<section>
-					<h2>First, Keep In Mind:</h2>
-
-                   <h3>Perl 6 is a brand new language, so some things are...</h3>
-
-                    <ul class="shy">
-                        <li>
-                            <code class="module">Buggy</code>&mdash;even the things I'll talk about
-                        </li>
-                        <li>
-                            <code class="module">Unfinished</code>&mdash;even though you can already use them
-                        </li>
-                        <li>
-                            <code class="module">Unoptimized</code>&mdash;at times, painfully slow
-                        </li>
-                    </ul>
-				</section>
-
-                <section>
-                    <h2>First, Keep In Mind:</h2>
-
-                   <h3>The Specification is solidified, so now the core team will focus on...</h3>
-
-                    <ul class="shy">
-                        <li>
-                            <code class="module">Fixing bugs</code>&mdash;in the things I'll talk about
-                        </li>
-                        <li>
-                            <code class="module">Finishing</code>&mdash;things you can already use
-                        </li>
-                        <li>
-                            <code class="module">Optimizing</code>&mdash;everything
-                        </li>
-                    </ul>
-                </section>
-
                 <section>
                     <h2>Mind The Unicode:</h2>
 
                     <p>Perl 6 lets you use fancy-pants Unicode terms and operators that you'll see in this presentation. All of them have "Texas&nbsp;variants" that use ASCII characters only. If you rather use those, see <a href="http://docs.perl6.org/language/unicode_texas">http://docs.perl6.org/language/unicode_texas</a> to find them.</p>
                 </section>
 
-                <section>
-                    <h2>Welcome to Hyperspace!</h2>
 
-                    <h3>Hyper operators, Hyper sequence methods, Promises and Supplies, Autothreaded junctions</h3>
+				<section>
+                    <h2>Couch Potato: Lazy lists and their uses</h2>
+					<p>
+						<img src="couch-potato.jpg" style="border: 0; box-shadow: none" height=400>
+					</p>
+                </section>
+
+				<section>
+                    <h2>Lazy Lists</h2>
+					<p>Let's do something crazy... like create an INFINITE LIST!!</p>
+
+					<pre><code class="perl">1: my @to-infinity-and-beyond = 0, 2 &hellip; &infin;;
+2: say @to-infinity-and-beyond[1008];
+
+# OUTPUT:
+# 2016</code></pre>
+                </section>
+
+				<section>
+                    <h2>Lazy Lists</h2>
+					<p>Something more useful: working with a giant file:</p>
+
+					<pre><code class="perl">1: for &#39;/tmp/4GB-file.txt&#39;.IO.words {
+2:     .say;
+3:     last if ++$ == 3;
+4: }
+5: say &quot;Code took {now - INIT now} seconds to run&quot;;
+
+# OUTPUT:
+# foo
+# bar
+# ber
+# Code took 0.0126666 seconds to run</code></pre>
+                </section>
+
+				<section>
+                    <h2>Lazy Lists</h2>
+					<p>Something more useful: working with a giant file</p>
+
+					<pre><code class="perl">1: .say for &#39;/tmp/4GB-file.txt&#39;.IO.words[0..2];
+2: say &quot;Code took {now - INIT now} seconds to run&quot;;
+
+# OUTPUT:
+# foo
+# bar
+# ber
+# Code took 0.0126666 seconds to run</code></pre>
+                </section>
+
+				<section>
+                    <h2>Molding Your Own</h2>
+					<h3>Subsets, Custom operators, Muti-dispatch</h3>
+					<p>
+						<img src="molding-your-own.jpg" style="border: 0; box-shadow: none" height=400>
+					</p>
+                </section>
+
+				<section>
+                    <h2>Subsets</h2>
+					<p>A subset of a type lets you restrict the values it accepts:</p>
+
+					<pre><code class="perl">1: subset BigPrime of Int where { $_ &gt; 10_000 and .is-prime }
+2:
+3: sub MAIN ( BigPrime $num ) {
+4:     say &quot;That&#39;s a nice-looking prime number you got there!&quot;;
+5: }</code></pre>
+
+					<pre class="shell-output"><span class="shell-command">$ perl6 test.p6 3</span>
+Usage:
+  test.p6 &lt;num&gt;
+<span class="shell-command">$ perl6 test.p6 31337</span>
+That's a nice-looking prime number you got there!
+<span class="shell-command">$ perl6 test.p6 100000</span>
+Usage:
+  test.p6 &lt;num&gt;</pre>
+                </section>
+
+				<section>
+                    <h2>Multi-Dispatch</h2>
+					<p>Multiple subs or methods of same name, but different parameters:</p>
+
+					<pre><code class="perl">1: subset Prime      of Int   where *.is-prime;
+2: subset BigPrime   of Prime where * &gt;  10_000;
+3: subset SmallPrime of Prime where * &lt;= 10_000;
+4:
+5: multi MAIN ( BigPrime   $num ) { say &quot;Prime number! Nice and big&quot;; }
+6: multi MAIN ( SmallPrime $num ) { say &quot;Puny prime number&quot;;          }
+7: multi MAIN (            $num ) { say &quot;Gimme primes!&quot;;              }</code></pre>
+
+					<pre class="shell-output"><span class="shell-command">$ perl6 test.p6 42</span>
+Gimme primes!
+<span class="shell-command">$ perl6 test.p6 7</span>
+Puny prime number
+<span class="shell-command">$ perl6 test.p6 31337</span>
+Prime number! Nice and big</pre>
+                </section>
+
+				<section>
+                    <h2>Multi-Dispatch</h2>
+					<p>Multiple subs or methods of same name, but different parameters:</p>
+
+					<pre><code class="perl">1: class Numbers {
+2:     multi method id ( Numeric $num ) { say &quot;$num is a number&quot;       }
+3:     multi method id (         $num ) { say &quot;$num is something else&quot; }
+4: }
+5: Numbers.new.id: &pi;;
+6: Numbers.new.id: &#39;blah&#39;;
+
+# OUTPUT:
+# 3.14159265358979 is a number
+# blah is something else
+</code></pre>
+                </section>
+
+				<section>
+                    <h2>Multi-Dispatch</h2>
+					<p>Extend method functionality:</p>
+
+					<pre><code class="perl"> 1: class Numbers {
+ 2:     multi method id ( Numeric $num ) { say &quot;$num is a number&quot;       }
+ 3:     multi method id (         $num ) { say &quot;$num is something else&quot; }
+ 4: }
+ 5:
+ 6: class SmarterNumbers is Numbers {
+ 7:     multi method id ( Numeric $num where * == &pi; ) { say &quot;Mmmm yummy pie!&quot; }
+ 8: }
+ 9:
+10: SmarterNumbers.new.id: 42;
+11: SmarterNumbers.new.id: &pi;;
+12: SmarterNumbers.new.id: &#39;blah&#39;;
+
+# OUTPUT:
+# 42 is a number
+# Mmmm yummy pie!
+# blah is something else
+</code></pre>
+                </section>
+
+				<section>
+                    <h2>Custom Terms and Operators</h2>
+					<p>
+						<img src="custom-ops.png" style="border: 0; box-shadow: none" height=400>
+					</p>
+                </section>
+
+				<section>
+                    <h2>Custom Terms and Operators</h2>
+					<pre><code class="perl">1: sub infix:&lt;&macr;\(&deg;_o)/&macr;&gt; {
+2:     ($^a, $^b).pick
+3: }
+4:
+5: say &#39;Coke&#39; &macr;\(&deg;_o)/&macr; &#39;Pepsi&#39;;
+
+# OUTPUT:
+# Pepsi
+</code></pre>
+				<p>Operator categories: <code>infix</code>, <code>prefix</code>, <code>postfix</code>, <code>circumfix</code>, <code>postcircumfix</code> and you can also use <code>term</code> for terms.</p>
+                </section>
+
+				<section>
+                    <h2>Custom Terms and Operators</h2>
+					<pre><code class="perl"> 1: sub prefix:&lt;&sum;&gt; (*@els) { @els.sum }
+ 2: say &sum; 1, 2, 3, 4;
+
+# OUTPUT:
+# 1234
+</code></pre>
+				<p>Doesn't seem to work well...</p>
+                </section>
+
+				<section>
+                    <h2>Custom Terms and Operators</h2>
+					<pre><code class="perl"> 1: sub prefix:&lt;&sum;&gt; (*@els) is looser(&amp;infix:&lt;,&gt;) { @els.sum }
+ 2: say &sum; 1, 2, 3, 4;
+
+# OUTPUT:
+# 10
+</code></pre>
+                </section>
+
+				<section>
+                    <h2>Custom Terms and Operators</h2>
+					<p>More examples:</p>
+					<pre><code class="perl"> 1: sub term:&lt;&xi;&gt; { (^10 + 1).pick; }
+ 2: sub postcircumfix:&lt;&#x2768;  &#x2769;&gt; ($pre, $inside) is rw {
+ 3:     $pre{$inside};
+ 4: }
+ 5:
+ 6: my %hash = :foo&lt;bar&gt;, :meow&lt;moo&gt;;
+ 7: %hash&#x2768;&#39;foo&#39;&#x2769;  = &xi;;
+ 8: %hash&#x2768;&#39;meow&#39;&#x2769; = &xi;;
+ 9:
+10: say %hash;
+
+# OUTPUT:
+# foo => 6, meow => 8
+</code></pre>
+                </section>
+
+				<section>
+                    <h2>Custom Terms and Operators</h2>
+					<p>Overriding existing operators:</p>
+					<pre><code class="perl"> 1: sub infix:&lt;+&gt; (Int $a, Int $b) { $a - $b };
+ 2: say 2 + 2;
+
+# OUTPUT:
+# 0</code></pre>
+				<p>
+					<img src="evil-operators.png" style="border: 0; box-shadow: none" height=400>
+				</p>
+                </section>
+
+				<section>
+					<h2>Custom Terms and Operators</h2>
+					<p>Don't worry... this effect is <strong>lexically scoped!</strong></p>
+				<p>
+					<img src="evil-operators-sad.png" style="border: 0; box-shadow: none" height=400>
+				</p>
+				</section>
+
+				<section>
+                    <h2>Custom Terms and Operators</h2>
+					<p>Overriding existing operators:</p>
+					<pre><code class="perl"> 1: class Thingamagig { has $.value };
+ 2:
+ 3: multi infix:&lt;~&gt; (Thingamagig $a, Str $b) {
+ 4:     $a.value ~ $b
+ 5: }
+ 6:
+ 7: my $thing = Thingamagig.new: value =&gt; &#39;thingamagig&#39;;
+ 8: say &#39;foo&#39; ~ &#39;bar&#39;;
+ 9: say $thing ~ &#39;bar&#39;;
+10: say &#39;bar&#39; ~ $thing;
+
+# OUTPUT:
+# foobar
+# thingamagigbar
+# barThingamagig&lt;139870715547680&gt;</code></pre>
+
+				<p>
+					See <a href="https://github.com/zoffixznet/perl6-Color/blob/master/lib/Color/Operators.pm6">Color::Operators</a> module from <span class="module">Color</span> distribution for more examples.
+				</p>
+
+                </section>
+
+				<section>
+                    <h2>Hyperspace</h2>
+					<h3>Multi-core processing at a touch of a button</h3>
 
                     <p><i>Punch it, Chewie.</i></p>
 
                     <p>
                         <img src="hyperspace.jpg" style="border: 0; box-shadow: none" height=400>
                     </p>
+                </section>
+
+				<section>
+                    <h2>Hyper Operators</h2>
+
+                    <p>They look like <code>«</code> and <code>»</code> and you might see <a href="http://perl6maven.com/tutorial/perl6-hyper-operators">them explained</a> with examples like these:</p>
+
+					<pre><code class="perl">      (1, 2) «+« (3)
+      (1, 2) »+» 1
+(1, 2, 3, 4) «+» (1, 2)</code></pre>
+                </section>
+
+				<section>
+                    <h2>Hyper Operators</h2>
+
+                    <p>Those won't be multi-threaded for a while, if at all. Instead, the variant I'll talk about is this one:
+
+					<pre><code class="perl">@foo».bar</code></pre>
                 </section>
 
                 <section>
@@ -195,7 +423,7 @@
 
 				<section>
                     <h2>Hyper Seqs</h2>
-					<p><code>.hyper</code> is the same, but it preserves the order of elements in the end sequence.</p>
+					<p><code>.hyper</code> is the same, but it preserves the order of elements in the resulting sequence.</p>
                 </section>
 
 				<section>
@@ -242,38 +470,127 @@
                 </section>
 
 				<section>
-                    <h2>Couch Potato: Lazy lists and their uses</h2>
-					<p>
-						<img src="couch-potato.jpg" style="border: 0; box-shadow: none" height=400>
-					</p>
+                    <h2>Promises</h2>
+
+                    <p>I don't always write concurrent code, but when I do, it's THIS simple:</p>
+                    <pre><code class="perl"> 1: start { sleep 3; say &quot;two&quot; };
+ 2: say &quot;one&quot;;
+ 3: sleep 5;
+ 4: say &quot;three&quot;;
+
+# OUTPUT:
+# one
+# two
+# three</code></pre>
                 </section>
 
 				<section>
-                    <h2>Lazy Lists</h2>
-					<p>Let's do something crazy... like create an INFINITE LIST!!</p>
+                    <h2>Promises</h2>
 
-					<pre><code class="perl">1: my @to-infinity-and-beyond = 0, 2 &hellip; &infin;;
-2: say @to-infinity-and-beyond[1008];
+                    <p>Concurrent / asynchronous code:</p>
+                    <pre><code class="perl"> 1: my @promises = ^3 .map: {
+ 2:     start {
+ 3:         .say; sleep 1;
+ 4:         $_ * 4;
+ 5:     }
+ 6: };
+ 7: say &quot;Started! {now - INIT now}&quot;;
+ 8: say await @promises;
+ 9: say &quot;All done! {now - INIT now}&quot;;
 
 # OUTPUT:
-# 2016</code></pre>
+# 0
+# 1
+# 2
+# Started! 0.0196113
+# (0 4 8)
+# All done! 1.0188611</code></pre>
+                </section>
+
+                <section>
+                    <h2>Promises</h2>
+
+                    <p>Start later:</p>
+                    <pre><code class="perl"> 1: Promise.in(5).then: -&gt; $v { say &quot;It&#39;s been {now - INIT now} seconds!&quot; };
+ 2: sleep 7;
+ 3: say &quot;Ran for {now - INIT now} seconds&quot
+
+# OUTPUT:
+# It's been 5.031918 seconds!
+# Ran for 7.0160562 seconds</code></pre>
                 </section>
 
 				<section>
-                    <h2>Lazy Lists</h2>
-					<p>Something more useful: working with a giant file:</p>
+                    <h2>Supplies</h2>
 
-					<pre><code class="perl">1: for &#39;/tmp/4GB-file.txt&#39;.IO.words {
-2:     .say;
-3:     last if ++$ == 3;
-4: }
-5: say &quot;Code took {now - INIT now} seconds to run&quot;;
+                    <p>Asynchronous data streaming:</p>
+                    <pre><code class="perl"> 1: my $supplier = Supplier.new;
+ 2:
+ 3: $supplier.Supply              .tap(-&gt; $v { say &quot;Original: $v&quot; });
+ 4: $supplier.Supply.map(  * &times; 2 ).tap(-&gt; $v { say &quot;  Double: $v&quot; });
+ 5: $supplier.Supply.grep( * % 2 ).tap(-&gt; $v { say &quot;  Odd: $v&quot;    });
+ 6:
+ 7: $supplier.emit: $_ for ^3;
 
 # OUTPUT:
-# foo
-# bar
-# ber
-# Code took 0.0126666 seconds to run</code></pre>
+# Original: 0
+#   Double: 0
+# Original: 1
+#   Double: 2
+#   Odd: 1
+# Original: 2
+#   Double: 4</code></pre>
+                </section>
+
+                <section>
+                    <h2>Supplies</h2>
+
+                    <p>Events at interval inside an event loop (<code>react</code>):</p>
+                    <pre><code class="perl"> 1: react {
+ 2:     whenever Supply.interval: 2 -&gt; $v {
+ 3:         say &quot;$v: {now - INIT now}&quot;;
+ 4:         done if $v == 2;
+ 5:     }
+ 6:     whenever Supply.interval: 1 -&gt; $v { say &quot;  1 sec: {now - INIT now}&quot;; }
+ 7: }
+
+ # OUTPUT:
+ # 0: 0.026734
+ #   1 sec: 0.0333274
+ #   1 sec: 1.02325708
+ # 1: 2.027192
+ #   1 sec: 2.0276854
+ #   1 sec: 3.0234109
+ # 2: 4.0324349</code></pre>
+                </section>
+
+                <section>
+                    <h2>Channels</h2>
+
+                    <p>A thread-safe queue:</p>
+                    <pre><code class="perl"> 1: my $c = Channel.new;
+ 2: start {
+ 3:     loop { say &quot;$c.receive() at {now - INIT now}&quot; }
+ 4: }
+ 5: await ^10 .map: -&gt; $r {
+ 6:     start {
+ 7:          sleep $r;
+ 8:          $c.send: $r;
+ 9:     }
+10: }
+11: $c.close;
+
+# OUTPUT:
+# 0 at 0.01036314
+# 1 at 1.0152853
+# 2 at 2.0174991
+# 3 at 3.020067105
+# 4 at 4.01953470
+# 5 at 5.0195884
+# 6 at 6.0205915
+# 7 at 7.020651
+# 8 at 8.02339744
+</code></pre>
                 </section>
 
                 <section>
@@ -327,7 +644,7 @@
 # 267914296</code></pre>
                 </section>
 
-                <section>
+				<section>
                     <h2>Psst, there's HyperWhatever!</h2>
                     <p>Just sayin'...</p>
                     <pre><code class="perl"> 1: say ( ** + 2 )(^10);
@@ -337,7 +654,7 @@
 # (2 3 4 5 6 7 8 9 10 11)
 # 2..^12</code></pre>
                 </section>
-                
+
                 <section>
                     <h2>Meta Operators</h2>
                     <p>Same as if you placed the operator that is inside the brackets
@@ -492,155 +809,7 @@
                     <p>Regular Perl 6 users can make Perl 6 better!</p>
                 </section>
 
-                <section>
-                    <h2>Promises</h2>
-
-                    <p>I don't always write concurrent code, but when I do, it's THIS simple:</p>
-                    <pre><code class="perl"> 1: start { sleep 3; say &quot;two&quot; };
- 2: say &quot;one&quot;;
- 3: sleep 5;
- 4: say &quot;three&quot;;
-
-# OUTPUT:
-# one
-# two
-# three</code></pre>
-                </section>
-                
 				<section>
-                    <h2>Promises</h2>
-
-                    <p>Concurrent / asynchronous code:</p>
-                    <pre><code class="perl"> 1: my @promises = ^3 .map: {
- 2:     start {
- 3:         .say; sleep 1;
- 4:         $_ * 4;
- 5:     }
- 6: };
- 7: say &quot;Started! {now - INIT now}&quot;;
- 8: say await @promises;
- 9: say &quot;All done! {now - INIT now}&quot;;
-
-# OUTPUT:
-# 0
-# 1
-# 2
-# Started! 0.0196113
-# (0 4 8)
-# All done! 1.0188611</code></pre>
-                </section>
-
-                <section>
-                    <h2>Promises</h2>
-
-                    <p>Start later and don't <code>await</code>.</p>
-                    <pre><code class="perl"> 1: Promise.in(5).then: -&gt; $v { say &quot;It&#39;s been {now - INIT now} seconds!&quot; };
- 2: sleep 7;
- 3: say &quot;Ran for {now - INIT now} seconds&quot
-
-# OUTPUT:
-# It's been 5.031918 seconds!
-# Ran for 7.0160562 seconds</code></pre>
-                </section>
-                
-				<section>
-                    <h2>Supplies</h2>
-
-                    <p>Asynchronous data streaming:</p>
-                    <pre><code class="perl"> 1: my $supplier = Supplier.new;
- 2:
- 3: $supplier.Supply              .tap(-&gt; $v { say &quot;Original: $v&quot; });
- 4: $supplier.Supply.map(  * &times; 2 ).tap(-&gt; $v { say &quot;  Double: $v&quot; });
- 5: $supplier.Supply.grep( * % 2 ).tap(-&gt; $v { say &quot;  Odd: $v&quot;    });
- 6:
- 7: $supplier.emit: $_ for ^3;
-
-# OUTPUT:
-# Original: 0
-#   Double: 0
-# Original: 1
-#   Double: 2
-#   Odd: 1
-# Original: 2
-#   Double: 4</code></pre>
-                </section>
-
-                <section>
-                    <h2>Supplies</h2>
-
-                    <p>Events at interval inside an event loop (<code>react</code>):</p>
-                    <pre><code class="perl"> 1: react {
- 2:     whenever Supply.interval: 2 -&gt; $v {
- 3:         say &quot;$v: {now - INIT now}&quot;;
- 4:         done if $v == 2;
- 5:     }
- 6:     whenever Supply.interval: 1 -&gt; $v { say &quot;  1 sec: {now - INIT now}&quot;; }
- 7: }
-
- # OUTPUT:
- # 0: 0.026734
- #   1 sec: 0.0333274
- #   1 sec: 1.02325708
- # 1: 2.027192
- #   1 sec: 2.0276854
- #   1 sec: 3.0234109
- # 2: 4.0324349</code></pre>
-                </section>
-
-                <section>
-                    <h2>Supplies</h2>
-
-                    <p>Events at interval inside an event loop (<code>react</code>):</p>
-                    <pre><code class="perl"> 1: react {
- 2:     whenever Supply.interval: 2 -&gt; $v {
- 3:         say &quot;$v: {now - INIT now}&quot;;
- 4:         done if $v == 2;
- 5:     }
- 6:     whenever Supply.interval: 1 -&gt; $v { say &quot;  1 sec: {now - INIT now}&quot;; }
- 7: }
-
- # OUTPUT:
- # 0: 0.026734
- #   1 sec: 0.0333274
- #   1 sec: 1.02325708
- # 1: 2.027192
- #   1 sec: 2.0276854
- #   1 sec: 3.0234109
- # 2: 4.0324349</code></pre>
-                </section>
-
-                <section>
-                    <h2>Channels</h2>
-
-                    <p>A thread-safe queue:</p>
-                    <pre><code class="perl"> 1: my $c = Channel.new;
- 2: start {
- 3:     my $closed = $c.closed;
- 4:     loop {
- 5:         if $c.poll -&gt; $v { say &quot;$v at {now - INIT now}&quot;; }
- 6:         elsif $closed { last; }
- 7:     }
- 8: }
- 9: await ^10 .map: -&gt; $r {
-10:     start {
-11:         sleep $r;
-12:         $c.send: $r;
-13:     }
-14: }
-15: $c.close;
-
- # OUTPUT:
- # 1 at 1.1899601
- # 2 at 2.2448493
- # 3 at 3.1632282
- # 4 at 4.0907133
- # 5 at 5.0342140
- # 6 at 6.0346844
- # 7 at 7.03496082
- # 8 at 8.0353044</code></pre>
-                </section>
-
-                <section>
                     <h2>Polyglot</h2>
 
                     <p>Use other languages from within Perl 6!</p>
@@ -693,13 +862,6 @@
 
 # OUTPUT:
 # This is awesome</code></pre>
-                </section>
-                
-                <section>
-                    <h2>Bonus Slides</h2>
-
-                    <p>How to include stack traces in async code.<br>
-                    show Proc::Async</p>
                 </section>
 
                 <section>

@@ -641,6 +641,61 @@
                 </section>
 
                 <section>
+                    <h2>Polyglot</h2>
+
+                    <p>Use other languages from within Perl 6!</p>
+                    <p>
+                        <img src="polyglot.jpg" style="border: 0; box-shadow: none" height=400>
+                    </p>
+                </section>
+
+                <section>
+                    <h2>NativeCall</h2>
+
+                    <p>Use C libraries without writing any C code!!</p>
+
+                    <p>(more or less)</p>
+                </section>
+
+                <section>
+                    <h2>NativeCall</h2>
+
+                    <p>Standard C library:</p>
+                    <pre><code class="perl"> 1: use NativeCall;
+ 2: sub fork is native {};
+ 3: fork;
+ 4: say $*PID;
+
+ # OUTPUT:
+ # 11274
+ # 11275</code></pre>
+                </section>
+
+                <section>
+                    <h2>BTW: A Safety Tip</h2>
+
+                    <p>There's <code>system</code> in standard C library:</p>
+                    <p>
+                        <img src="restricted.png" style="border: 0; box-shadow: none">
+                    </p>
+                </section>
+
+                <section>
+                    <h2>Inline::Perl5</h2>
+
+                    <p>Use any Perl 5 module in Perl 6!</p>
+                    <pre><code class="perl"> 1: use Inline::Perl5;
+ 2: use Mojo::DOM:from&lt;Perl5&gt;;
+ 3:
+ 4: my $dom = Mojo::DOM.new: &#39;&lt;p&gt;&lt;b&gt;This is awesome&lt;/b&gt;, trust me&lt;/p&gt;&#39;;
+ 5:
+ 6: say $dom.at(&#39;b&#39;).all_text;
+
+# OUTPUT:
+# This is awesome</code></pre>
+                </section>
+                
+                <section>
                     <h2>Bonus Slides</h2>
 
                     <p>How to include stack traces in async code.<br>

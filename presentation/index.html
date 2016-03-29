@@ -328,6 +328,17 @@
                 </section>
 
                 <section>
+                    <h2>Psst, there's HyperWhatever!</h2>
+                    <p>Just sayin'...</p>
+                    <pre><code class="perl"> 1: say ( ** + 2 )(^10);
+ 2: say (  * + 2 )(^10);
+
+# OUTPUT:
+# (2 3 4 5 6 7 8 9 10 11)
+# 2..^12</code></pre>
+                </section>
+                
+                <section>
                     <h2>Meta Operators</h2>
                     <p>Same as if you placed the operator that is inside the brackets
                     between each element in the list:</p>
@@ -481,14 +492,57 @@
                     <p>Regular Perl 6 users can make Perl 6 better!</p>
                 </section>
 
+                <section>
+                    <h2>Promises</h2>
+
+                    <p>I don't always write concurrent code, but when I do, it's THIS simple:</p>
+                    <pre><code class="perl"> 1: start { sleep 3; say &quot;two&quot; };
+ 2: say &quot;one&quot;;
+ 3: sleep 5;
+ 4: say &quot;three&quot;;
+
+# OUTPUT:
+# one
+# two
+# three</code></pre>
+                </section>
+                
 				<section>
                     <h2>Promises</h2>
 
                     <p>Concurrent / asynchronous code:</p>
-                    <pre><code class="perl"></code></pre>
+                    <pre><code class="perl"> 1: my @promises = ^3 .map: {
+ 2:     start {
+ 3:         .say; sleep 1;
+ 4:         $_ * 4;
+ 5:     }
+ 6: };
+ 7: say &quot;Started! {now - INIT now}&quot;;
+ 8: say await @promises;
+ 9: say &quot;All done! {now - INIT now}&quot;;
 
+# OUTPUT:
+# 0
+# 1
+# 2
+# Started! 0.0196113
+# (0 4 8)
+# All done! 1.0188611</code></pre>
                 </section>
 
+                <section>
+                    <h2>Promises</h2>
+
+                    <p>Start later and don't <code>await</code>.</p>
+                    <pre><code class="perl"> 1: Promise.in(5).then: -&gt; $v { say &quot;It&#39;s been {now - INIT now} seconds!&quot; };
+ 2: sleep 7;
+ 3: say &quot;Ran for {now - INIT now} seconds&quot
+
+# OUTPUT:
+# It's been 5.031918 seconds!
+# Ran for 7.0160562 seconds</code></pre>
+                </section>
+                
 				<section>
                     <h2>Supplies</h2>
 
@@ -509,7 +563,88 @@
 #   Odd: 1
 # Original: 2
 #   Double: 4</code></pre>
+                </section>
 
+                <section>
+                    <h2>Supplies</h2>
+
+                    <p>Events at interval inside an event loop (<code>react</code>):</p>
+                    <pre><code class="perl"> 1: react {
+ 2:     whenever Supply.interval: 2 -&gt; $v {
+ 3:         say &quot;$v: {now - INIT now}&quot;;
+ 4:         done if $v == 2;
+ 5:     }
+ 6:     whenever Supply.interval: 1 -&gt; $v { say &quot;  1 sec: {now - INIT now}&quot;; }
+ 7: }
+
+ # OUTPUT:
+ # 0: 0.026734
+ #   1 sec: 0.0333274
+ #   1 sec: 1.02325708
+ # 1: 2.027192
+ #   1 sec: 2.0276854
+ #   1 sec: 3.0234109
+ # 2: 4.0324349</code></pre>
+                </section>
+
+                <section>
+                    <h2>Supplies</h2>
+
+                    <p>Events at interval inside an event loop (<code>react</code>):</p>
+                    <pre><code class="perl"> 1: react {
+ 2:     whenever Supply.interval: 2 -&gt; $v {
+ 3:         say &quot;$v: {now - INIT now}&quot;;
+ 4:         done if $v == 2;
+ 5:     }
+ 6:     whenever Supply.interval: 1 -&gt; $v { say &quot;  1 sec: {now - INIT now}&quot;; }
+ 7: }
+
+ # OUTPUT:
+ # 0: 0.026734
+ #   1 sec: 0.0333274
+ #   1 sec: 1.02325708
+ # 1: 2.027192
+ #   1 sec: 2.0276854
+ #   1 sec: 3.0234109
+ # 2: 4.0324349</code></pre>
+                </section>
+
+                <section>
+                    <h2>Channels</h2>
+
+                    <p>A thread-safe queue:</p>
+                    <pre><code class="perl"> 1: my $c = Channel.new;
+ 2: start {
+ 3:     my $closed = $c.closed;
+ 4:     loop {
+ 5:         if $c.poll -&gt; $v { say &quot;$v at {now - INIT now}&quot;; }
+ 6:         elsif $closed { last; }
+ 7:     }
+ 8: }
+ 9: await ^10 .map: -&gt; $r {
+10:     start {
+11:         sleep $r;
+12:         $c.send: $r;
+13:     }
+14: }
+15: $c.close;
+
+ # OUTPUT:
+ # 1 at 1.1899601
+ # 2 at 2.2448493
+ # 3 at 3.1632282
+ # 4 at 4.0907133
+ # 5 at 5.0342140
+ # 6 at 6.0346844
+ # 7 at 7.03496082
+ # 8 at 8.0353044</code></pre>
+                </section>
+
+                <section>
+                    <h2>Bonus Slides</h2>
+
+                    <p>How to include stack traces in async code.<br>
+                    show Proc::Async</p>
                 </section>
 
                 <section>

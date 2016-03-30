@@ -82,7 +82,7 @@
 
 
 				<section>
-                    <h2>Couch Potato: Lazy lists and their uses</h2>
+                    <h2>Lazy Lists and Their Uses</h2>
 					<p>
 						<img src="couch-potato.jpg" style="border: 0; box-shadow: none" height=400>
 					</p>
@@ -526,9 +526,9 @@ Prime number! Nice and big</pre>
                     <p>Asynchronous data streaming:</p>
                     <pre><code class="perl"> 1: my $supplier = Supplier.new;
  2:
- 3: $supplier.Supply              .tap(-&gt; $v { say &quot;Original: $v&quot; });
- 4: $supplier.Supply.map(  * &times; 2 ).tap(-&gt; $v { say &quot;  Double: $v&quot; });
- 5: $supplier.Supply.grep( * % 2 ).tap(-&gt; $v { say &quot;  Odd: $v&quot;    });
+ 3: $supplier.Supply              .tap: -&gt; $v { say &quot;Original: $v&quot; };
+ 4: $supplier.Supply.map(  * &times; 2 ).tap: -&gt; $v { say &quot;  Double: $v&quot; };
+ 5: $supplier.Supply.grep( * % 2 ).tap: -&gt; $v { say &quot;  Odd: $v&quot;    };
  6:
  7: $supplier.emit: $_ for ^3;
 
@@ -591,6 +591,52 @@ Prime number! Nice and big</pre>
 # 7 at 7.020651
 # 8 at 8.02339744
 </code></pre>
+                </section>
+
+                <section>
+                    <h2>Grammars!</h2>
+                    <h3><i>An easy way to parse things</i></h3>
+
+                    <p>
+                        <img src="grammar.png" style="border: 0; box-shadow: none" height=400>
+                    </p>
+                </section>
+
+                <section>
+                    <h2>Grammars!</h2>
+                    <h3><i>An easy way to parse things</i></h3>
+
+                    <pre><code class="perl"> 1: grammar MyGrammar {
+ 2:     token TOP     { &lt;sign&gt; &lt;digits&gt; &lt;decimal&gt;? }
+ 3:     token sign    { &lt;[+-]&gt;?                    }
+ 4:     token digits  { \d+                        }
+ 5:     token decimal { \. &lt;digits&gt;                }
+ 6: }
+ 7:
+ 8: class MyActions {
+ 9:     method sign ($/) { $/.make: $/.chars ?? ~$/ !! &#39;+&#39;                        }
+10:     method TOP  ($/) { $/.make: $&lt;sign&gt;.made ~ ($&lt;digits&gt; + 42 ) ~ $&lt;decimal&gt; }
+11: }
+12:
+13: say MyGrammar.parse(&#39;250.42&#39;, actions =&gt; MyActions).made;
+
+# OUTPUT:
+# +292.42</code></pre>
+                </section>
+
+                <section>
+                    <h2>Grammars!</h2>
+                    <h3>Useful modules:</h3>
+
+                    <ul class="shy">
+                        <li>
+                            <code class="module"><a href="http://modules.perl6.org/dist/Grammar::Debugger">Grammar::Debugger</a>
+                            and <a href="http://modules.perl6.org/dist/Grammar::Debugger">Grammar::Tracer</a></code>&mdash;just <code>use</code> one of the modules in the distro to get debug output for your grammars
+                        </li>
+                        <li>
+                            <code class="module"><a href="http://modules.perl6.org/dist/Grammar::BNF">Grammar::BNF</a></code>&mdash;convert BNF to Perl 6 grammars automagically!!
+                        </li>
+                    </ul>
                 </section>
 
                 <section>
@@ -708,6 +754,81 @@ Prime number! Nice and big</pre>
  5:     has Str    $.attr-rw is rw where *.chars &lt; 5;
  6:     has Primes $.attr-required is required;
  7: }</code></pre>
+                </section>
+
+                <section>
+                    <h2>Model6 Object Model</h2>
+
+                    <p>Roles&mdash;safely add behaviour to your classes:</p>
+                    <pre><code class="perl"> 1: role Drawable {
+ 2:     method draw { say &quot;Line from $.x to $.y&quot; };
+ 3: }
+ 4: class Line does Drawable {
+ 5:     has $.x;
+ 6:     has $.y;
+ 7: }
+ 8: my $line = Line.new: :42x, :75y;
+ 9: $line.draw;
+
+# OUTPUT:
+# Line from 42 to 75</code></pre>
+                </section>
+
+                <section>
+                    <h2>Model6 Object Model</h2>
+
+                    <p>Roles&mdash;safely add behaviour to your classes:</p>
+                    <pre><code class="perl"> 1: role Drawable {
+ 2:     method draw { say &quot;Line from $.x to $.y&quot; };
+ 3: }
+ 4: role OtherDrawable {
+ 5:     method draw { say &quot;It&#39;s a draw!&quot; };
+ 6: }
+ 7: class Line does Drawable does OtherDrawable {
+ 8:     has $.x;
+ 9:     has $.y;
+10: }
+11: my $line = Line.new: :42x, :75y;
+12: $line.draw;
+
+# OUTPUT:
+# ===SORRY!=== Error while compiling /home/zoffix/CPAN/TPM-2016/test.p6
+# Method 'draw' must be resolved by class Line because it exists in multiple
+# roles (OtherDrawable, Drawable) at /home/zoffix/CPAN/TPM-2016/test.p6:7
+</code></pre>
+                </section>
+
+                <section>
+                    <h2>MOP: Meta Object Protocol</h2>
+                    <p>Introspection and the Perl 6 Object System</p>
+                    <p>
+                        <img src="mop.png" style="border: 0; box-shadow: none" height=400>
+                    </p>
+                </section>
+
+                <section>
+                    <h2>MOP: Meta Object Protocol</h2>
+                    <pre><code class="perl"> 1: #| Just &#39;cause
+ 2: class TestStuff {};
+ 3: my $x = TestStuff.new;
+ 4: say $x.WHAT;     # (TestStuff)  # The type object of the type
+ 5: say $x.WHICH;    # TestStuff|179689128 # The object's identity value
+ 6: say $x.WHO;      # TestStuff # The package supporting the object
+ 7: say $x.WHERE;    # -1225903068 # The memory address of the object (not stable)
+ 8: say $x.HOW;      # Perl6::Metamodel::ClassHOW.new # The metaclass object
+ 9: say $x.WHY;      # Just &#39;cause # The attached Pod value.
+10: say $x.DEFINITE; # True # Returns True for instances and False for type objects</code></pre>
+                </section>
+                
+                <section>
+                    <h2>MOP: Meta Object Protocol</h2>
+                    <pre><code class="perl"> 1: Int.^add_method(&#39;x&#39;, -&gt; $class, $v { say $v });
+ 2: constant A := Metamodel::ClassHOW.new_type( name =&gt; &#39;A&#39; );
+ 3: A.^add_method(&#39;x&#39;, -&gt; $class, $v { say $v });
+ 4: #A.^compose;
+ 5:
+ 6: A.x: &#39;A class&#39;;
+ 7: Int.x: &#39;Int class&#39;;</code></pre>
                 </section>
 
                 <section>
@@ -847,6 +968,38 @@ Prime number! Nice and big</pre>
                     <p>
                         <img src="restricted.png" style="border: 0; box-shadow: none">
                     </p>
+                </section>
+
+                <section>
+                    <h2>NativeCall</h2>
+
+                    <p>Using a C library:</p>
+                    <pre><code class="perl"> 1: class STMT is export is repr(&#39;CPointer&#39;) { };
+ 2: sub sqlite3_column_text(STMT, int32)
+ 3:     returns Str
+ 4:     is native(&#39;sqlite3&#39;, v0) { };</code></pre>
+                </section>
+
+                <section>
+                    <h2>NativeCall</h2>
+
+                    <pre><code class="perl">int8           (int8_t in C, also used for char)
+int16          (int16_t in C, also used for short)
+int32          (int32_t in C, also used for int)
+int64          (int64_t in C)
+uint8          (uint8_t in C, also used for unsigned char)
+uint16         (uint16_t in C, also used for unsigned short)
+uint32         (uint32_t in C, also used for unsigned int)
+uint64         (uint64_t in C)
+long           (long in C)
+longlong       (long long in C, at least 64-bit)
+num32          (float in C)
+num64          (double in C)
+Str            (C string)
+CArray[int32]  (int* in C, an array of ints)
+Pointer[void]  (void* in C, can point to all other types)
+bool           (bool from C99)
+size_t         (size_t in C)</code></pre>
                 </section>
 
                 <section>

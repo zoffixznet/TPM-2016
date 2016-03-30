@@ -113,7 +113,7 @@
 # foo
 # bar
 # ber
-# Code took 0.0126666 seconds to run</code></pre>
+# Code took 0.01111143 seconds to run</code></pre>
                 </section>
 
 				<section>
@@ -127,7 +127,7 @@
 # foo
 # bar
 # ber
-# Code took 0.0126666 seconds to run</code></pre>
+# Code took 0.01111143 seconds to run</code></pre>
                 </section>
 
 				<section>
@@ -259,14 +259,22 @@ Prime number! Nice and big</pre>
 # OUTPUT:
 # 10
 </code></pre>
+					<p>
+						Use <code>is looser</code> / <code>is tighter</code> to change precedence.
+						Default precedence is same as <code>+</code>/<code>++</code> operator in that position.
+					</p>
+
+					<p>
+						(See <a href="https://doc.perl6.org/language/functions#Associativity">docs</a> on how to change associativity with <code>is assoc</code> trait)
+					</p>
                 </section>
 
 				<section>
                     <h2>Custom Terms and Operators</h2>
 					<p>More examples:</p>
 					<pre><code class="perl"> 1: sub term:&lt;&xi;&gt; { (^10 + 1).pick; }
- 2: sub postcircumfix:&lt;&#x2768;  &#x2769;&gt; ($pre, $inside) is rw {
- 3:     $pre{$inside};
+ 2: sub postcircumfix:&lt;&#x2768;  &#x2769;&gt; ($before, $inside) is rw {
+ 3:     $before{$inside};
  4: }
  5:
  6: my %hash = :foo&lt;bar&gt;, :meow&lt;moo&gt;;
@@ -467,12 +475,16 @@ Prime number! Nice and big</pre>
 				<section>
                     <h2>Autothreaded junctions</h2>
 					<p>Best part? Junctions are autothreaded, meaning they are a <i>hint</i> to the compiler it can evaluate them on multiple threads!</p>
+
+					<p>
+						<img src="happy.png" style="border: 0; box-shadow: none" height=400>
+					</p>
                 </section>
 
 				<section>
                     <h2>Promises</h2>
 
-                    <p>I don't always write concurrent code, but when I do, it's THIS simple:</p>
+                    <p>I don't always write concurrent code,<br>but when I do, it's THIS simple:</p>
                     <pre><code class="perl"> 1: start { sleep 3; say &quot;two&quot; };
  2: say &quot;one&quot;;
  3: sleep 5;
@@ -600,6 +612,28 @@ Prime number! Nice and big</pre>
                     <p>
                         <img src="grammar.png" style="border: 0; box-shadow: none" height=400>
                     </p>
+                </section>
+
+				<section>
+                    <h2>Grammars!</h2>
+                    <h3><i>An easy way to parse things</i></h3>
+
+                    <pre><code class="perl"> 1: grammar MyGrammar {
+ 2:     token TOP     { &lt;sign&gt; &lt;digits&gt; &lt;decimal&gt;? }
+ 3:     token sign    { &lt;[+-]&gt;?                    }
+ 4:     token digits  { \d+                        }
+ 5:     token decimal { \. &lt;digits&gt;                }
+ 6: }
+ 7:
+ 8: say MyGrammar.parse: &#39;250.42&#39;;
+
+# OUTPUT:
+# ｢250.42｣
+#  sign => ｢｣
+#  digits => ｢250｣
+#  decimal => ｢.42｣
+#   digits => ｢42｣
+</code></pre>
                 </section>
 
                 <section>
@@ -819,7 +853,7 @@ Prime number! Nice and big</pre>
  9: say $x.WHY;      # Just &#39;cause # The attached Pod value.
 10: say $x.DEFINITE; # True # Returns True for instances and False for type objects</code></pre>
                 </section>
-                
+
                 <section>
                     <h2>MOP: Meta Object Protocol</h2>
                     <pre><code class="perl"> 1: Int.^add_method(&#39;x&#39;, -&gt; $class, $v { say $v });
@@ -910,26 +944,6 @@ Prime number! Nice and big</pre>
                     <p>See <a href="http://docs.perl6.org/language/setbagmix">the docs</a> for full list of operators.</p>
                 </section>
 
-                <section>
-                    <h2>Simple Things:<br>Hacking on the Perl 6 Compiler</h2>
-
-                    <p>
-                        <img src="hacking-compiler.jpg" style="border: 0; box-shadow: none" height=400>
-                    </p>
-                </section>
-
-                <section>
-                    <h2>As crazy as it sounds...</h2>
-
-                    <p>Perl 6 is <small>[mostly]</small> written in Perl 6</p>
-                </section>
-
-                <section>
-                    <h2>Which means...</h2>
-
-                    <p>Regular Perl 6 users can make Perl 6 better!</p>
-                </section>
-
 				<section>
                     <h2>Polyglot</h2>
 
@@ -974,7 +988,7 @@ Prime number! Nice and big</pre>
                     <h2>NativeCall</h2>
 
                     <p>Using a C library:</p>
-                    <pre><code class="perl"> 1: class STMT is export is repr(&#39;CPointer&#39;) { };
+                    <pre><code class="perl"> 1: class STMT is repr(&#39;CPointer&#39;) { };
  2: sub sqlite3_column_text(STMT, int32)
  3:     returns Str
  4:     is native(&#39;sqlite3&#39;, v0) { };</code></pre>
@@ -1002,8 +1016,27 @@ bool           (bool from C99)
 size_t         (size_t in C)</code></pre>
                 </section>
 
+				<section>
+                    <h2>NativeCall</h2>
+
+					<p>Use <a href="http://modules.perl6.org/dist/App::GPTrixie">App::GPTrixie</a> to convert C headers into Perl 6 sub definitions:</p>
+					<pre class="shell-output"><span class="shell-command">$ gptrixie --all /usr/local/include/gumbo.h
+
+## Enumerations
+enum GumboNamespaceEnum is export (
+   GUMBO_NAMESPACE_HTML => 0,
+   GUMBO_NAMESPACE_SVG => 1,
+   GUMBO_NAMESPACE_MATHML => 2
+);
+enum GumboParseFlags is export (
+   GUMBO_INSERTION_NORMAL => 0,
+   GUMBO_INSERTION_BY_PARSER => 1,
+
+   ...</pre>
+                </section>
+
                 <section>
-                    <h2>Inline::Perl5</h2>
+                    <h2><a href="http://modules.perl6.org/dist/Inline::Perl5">Inline::Perl5</a></h2>
 
                     <p>Use any Perl 5 module in Perl 6!</p>
                     <pre><code class="perl"> 1: use Inline::Perl5;
@@ -1016,6 +1049,114 @@ size_t         (size_t in C)</code></pre>
 # OUTPUT:
 # This is awesome</code></pre>
                 </section>
+
+				<section>
+                    <h2><a href="http://modules.perl6.org/dist/Inline::Perl5">Inline::Perl5</a></h2>
+
+					<ul>
+						<li>
+							Supports Perl 5 modules, including XS modules
+						</li>
+						<li>Allows passing integers, strings, arrays, hashes, code references, file handles and objects between Perl 5 and Perl 6</li>
+						<li>Supports calling methods on Perl 5 objects from Perl 6 and calling methods on Perl 6 objects from Perl 5</li>
+						<li>Subclass Perl 5 classes in Perl 6</li>
+					</ul>
+                </section>
+
+				<section>
+					<h2>Use a bunch of other languages...</h2>
+					<p>Mileage may vary:</p>
+
+					<p>
+						<img src="inlines.png" style="border: 0; box-shadow: none" height=400>
+					</p>
+				</section>
+
+				<section>
+                    <h2>Simple Things:<br>Hacking on the Perl 6 Compiler</h2>
+
+                    <p>
+                        <img src="hacking-compiler.jpg" style="border: 0; box-shadow: none" height=400>
+                    </p>
+                </section>
+
+                <section>
+                    <h2>As crazy as it sounds...</h2>
+
+                    <p>Perl 6 is <small>[mostly]</small> written in Perl 6</p>
+                </section>
+
+                <section>
+                    <h2>Which means...</h2>
+
+                    <p>Regular Perl 6 users can make Perl 6 better!</p>
+                </section>
+
+				<section>
+                    <h2>Simple Things:<br>Hacking on the Perl 6 Compiler</h2>
+
+                    <p>
+                        <img src="module-in-perl6.png" style="border: 0; box-shadow: none">
+                    </p>
+                </section>
+
+				<section>
+                    <h2>Perl 6 is Written in Perl 6</h2>
+					<h3>How??</h3>
+
+					<p>
+						The basics are written in NQP (Not Quite Perl): <a href="https://github.com/perl6/nqp">https://github.com/perl6/nqp</a>
+					</p>
+
+					<p>
+						<img src="nqp.png" style="border: 0; box-shadow: none">
+					</p>
+                </section>
+
+				<section>
+                    <h2>Perl 6 is Written in Perl 6</h2>
+					<p>
+						The rest is written in Perl 6: <a href="https://github.com/rakudo/rakudo">https://github.com/rakudo/rakudo</a>
+					</p>
+
+					<p>
+						<img src="nqp-code.png" style="border: 0; box-shadow: none">
+					</p>
+                </section>
+
+				<section>
+                    <h2>Perl 6 is Written in Perl 6</h2>
+					<h3>And parsing...?</h3>
+					<p>
+						Yup, just a Perl 6 Grammar:</a>
+					</p>
+
+					<p>
+						<img src="parsing-perl6.png" style="border: 0; box-shadow: none">
+					</p>
+                </section>
+				<section>
+                    <h2>Bonus Slides</h2>
+					<p>
+						<img src="bonus.png" style="border: 0; box-shadow: none">
+					</p>
+                </section>
+
+				<section>
+                    <h2>Bonus Slides</h2>
+
+                    <p>How to include stack traces in async code.<br>
+                    show Proc::Async</p>
+					<p>
+						0/0 division
+					</p>
+					<p>
+						say only for humans. Prints first 100 elements only
+					</p>
+					<p>
+						profiler
+					</p>
+                 </section>
 
                 <section>
                     <h2>Thank You!</h2>

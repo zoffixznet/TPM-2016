@@ -54,3 +54,14 @@ table.real-table th {
     border: 1px solid #999;
     padding: 3px 5px;
 }
+
+.shell-output {
+    padding: 5px 10px!important;
+    background: #333;
+    color: #eee;
+}
+
+.shell-command {
+    color: #0e0;
+    font-weight: bold;
+}

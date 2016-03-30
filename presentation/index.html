@@ -1143,20 +1143,149 @@ enum GumboParseFlags is export (
                 </section>
 
 				<section>
-                    <h2>Bonus Slides</h2>
+                    <h2>Failures in Concurrent Code</h2>
 
-                    <p>How to include stack traces in async code.<br>
-                    show Proc::Async</p>
+                    <p>What line is the error at?</p>
+                    <pre><code class="perl"> 1: my $promise = start {
+ 2:     say 0/0;
+ 3:     # A whole
+ 4:     # bunch
+ 5:     # of other code
+ 6: };
+ 7:
+ 8: say await $promise;
+
+# OUTPUT:
+# Attempt to divide by zero using div
+#   in block &lt;unit&gt; at test.p6 line 8</code></pre>
+                </section>
+
+				<section>
+                    <h2>Failures in Concurrent Code</h2>
+
+                    <p>Include a backtrace:</p>
+                    <pre><code class="perl"> 1: my $promise = start {
+ 2:     say 0/0;
+ 3:     # A whole
+ 4:     # bunch
+ 5:     # of other code
+ 6:     CATCH { warn .backtrace };
+ 7: };
+ 8:
+ 9: say await $promise;
+
+# OUTPUT:
+#   in block  at test.p6 line 2
+#   in block  at test.p6 line 6
+# Attempt to divide by zero using div
+#   in block &lt;unit&gt; at test.p6 line 9</code></pre>
+                </section>
+
+				<section>
+					<h2>Rats!</a></h2>
+
+					<p><code class="module"><a href="http://docs.perl6.org/type/Rat">Rat</a></code> is a Perl 6 type that represents a number with a numerators and denominator:</p>
+					<pre><code class="perl"> 1: my $x = 0/0;
+ 2: say &#39;Universe is still unimploded&#39;;
+ 3: say sin $x;
+
+# OUTPUT:
+# Universe is still unimploded
+# NaN</code></pre>
+				</section>
+
+				<section>
+					<h2>Rats!</a></h2>
+
+					<p>Actual number is calculated only when needed:</p>
+					<pre><code class="perl"> 1: my $x = 0/0;
+ 2: say &#39;Universe is still unimploded&#39;;
+ 3: say $x;
+
+# OUTPUT:
+# Universe is still unimploded
+# Attempt to divide by zero using div
+#   in block &lt;unit&gt; at test.p6 line 3
+#
+# Actually thrown at:
+#   in block &lt;unit&gt; at test.p6 line 3</code></pre>
+				</section>
+
+				<section>
+					<h2><a href="http://docs.perl6.org/language/concurrency#Proc%3A%3AAsync">Proc::Async</a></h2>
+
+					<p>Async communication with other programs:</p>
+					<pre><code class="perl"> 1: my $proc = Proc::Async.new: :w, &#39;grep&#39;, &#39;foo&#39;;
+ 2: $proc.stdout.tap: -&gt; $v { print &quot;Output: $v&quot; };
+ 3:
+ 4: say &#39;Starting grep process...&#39;;
+ 5: my $promise = $proc.start;
+ 6:     $proc.say: &#39;this line has foo&#39;;
+ 7:     $proc.say: "this one doesn&#39;t";
+ 8:     $proc.close-stdin;
+ 9: await $promise;
+10: say &#39;Done.&#39;;
+
+# OUTPUT:
+# Starting grep process...
+# Output: this line has foo
+# Done.</code></pre>
+				</section>
+
+				<section>
+					<h2>Don't <code>say</code> too much!</h2>
+
+					<p><code>say</code> function/method is for displaying brief info for human consumption and calls objects' <code>gist</code> method.
+					If you want to output large chunks of stuff, use <code>put</code> function/method:</p>
+
+					<pre><code class="perl"> 1: ^101 .say;
+ 2: (0..100).list.say;
+ 3: say &#39;----------&#39;;
+ 4: ^101 .put;
+ 5: (0..100).put;
+
+# OUTPUT:
+# ^101
+# (0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 ...)
+# ----------
+# 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100
+# 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100
+</code></pre>
+				</section>
+
+				<section>
+					<h2>More Useful Objects</h2>
+
+					<p>Make your objects work right when <code>say</code>-ed, <code>put</code>-ed, or anything else:</p>
+
+					<pre><code class="perl"> 1: class Thingamagig {
+ 2:     method gist    { &#39;Brief info&#39;        }
+ 3:     method Str     { &#39;Not so brief info&#39; }
+ 4:     method Numeric { 42                  }
+ 5: }
+ 6:
+ 7: my $thing = Thingamagig.new;
+ 8: say $thing;
+ 9: put $thing;
+10: say $thing + 2;
+
+# OUTPUT:
+# Brief info
+# Not so brief info
+# 44</code></pre>
+				</section>
+
+				<section>
+					<h2>Built-In Profiler</h2>
+
+					<p>Just specify <code>--profile</code> flag on the command line, and the HTML file with results will be generated for you.</p>
+
+					<pre class="shell-output"><span class="shell-command">$ perl6 --profile test.p6</span></pre>
+
 					<p>
-						0/0 division
-					</p>
-					<p>
-						say only for humans. Prints first 100 elements only
-					</p>
-					<p>
-						profiler
-					</p>
-                 </section>
+                        <img src="profiler.png" style="border: 0; box-shadow: none">
+                    </p>
+				</section>
 
                 <section>
                     <h2>Thank You!</h2>
